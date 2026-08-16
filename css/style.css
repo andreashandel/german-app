@@ -391,6 +391,53 @@ button:disabled {
   min-height: 1.4em;
 }
 
+/* Speaker sits beside the German word without pushing it off-centre. */
+.speak-btn {
+  border: none;
+  background: none;
+  padding: 0 0 0 10px;
+  font-size: 0.55em;
+  line-height: 1;
+  cursor: pointer;
+  vertical-align: middle;
+  opacity: 0.55;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.speak-btn:hover,
+.speak-btn:focus-visible {
+  opacity: 1;
+}
+
+.speak-btn:active {
+  transform: scale(0.92);
+}
+
+.answer .speak-btn {
+  font-size: 0.8em;
+}
+
+.hint-line {
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin: 12px 0 0;
+  overflow-wrap: break-word;
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+}
+
+.check-row .secondary {
+  padding-inline: 22px;
+}
+
 .accent-row {
   display: flex;
   gap: 8px;

@@ -134,7 +134,7 @@ rank,german,article,plural,english,pos,example_de,example_en
 133,Schule,die,Schulen,"school",noun,"Die Kinder gehen zur Schule.","The children go to school."
 134,Buch,das,Bücher,"book",noun,"Dieses Buch ist sehr spannend.","This book is very exciting."
 135,Auto,das,Autos,"car",noun,"Unser Auto ist kaputt.","Our car is broken."
-136,Stunde,die,Stunden,"hour; class",noun,"Wir warten seit einer Stunde.","We have been waiting for an hour."
+136,Stunde,die,Stunden,"hour",noun,"Wir warten seit einer Stunde.","We have been waiting for an hour."
 137,essen,,,"to eat",verb,"Was möchtest du essen?","What would you like to eat?"
 138,trinken,,,"to drink",verb,"Ich trinke morgens Kaffee.","I drink coffee in the morning."
 139,lesen,,,"to read",verb,"Sie liest jeden Abend.","She reads every evening."

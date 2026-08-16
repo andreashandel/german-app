@@ -1,7 +1,11 @@
 import fs from 'node:fs';
 import { parseCsv, toWords, germanDisplay } from '../js/csv.js';
 import { selectWords, countByPos } from '../js/deck.js';
-import { checkAnswer, normalise, acceptedAnswers, makeCard } from '../js/quiz.js';
+import {
+  checkAnswer, normalise, acceptedAnswers, makeCard,
+  hintMask, hintLength, hintFor, hintMax,
+} from '../js/quiz.js';
+import { recordResult } from '../js/progress.js';
 
 let pass = 0, fail = 0;
 const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.log('FAIL:', name); } };
@@ -123,6 +127,60 @@ const bis = words.find((w) => w.german === 'bis');
 ok('short word no typo budget', !checkAnswer('bei', bis, 'en-de').correct);
 ok('short word exact still works', checkAnswer('bis', bis, 'en-de').correct);
 
+
+// --- English nouns accept a leading article
+const stunde = words.find((w) => w.german === 'Stunde');
+ok('Stunde is just hour now', stunde.english.length === 1 && stunde.english[0] === 'hour');
+ok('bare English noun', checkAnswer('hour', stunde, 'de-en').correct);
+ok('English noun with the', checkAnswer('the hour', stunde, 'de-en').correct);
+ok('English noun with a', checkAnswer('a hour', stunde, 'de-en').correct);
+ok('the + typo still forgiven', checkAnswer('the huor', stunde, 'de-en').correct);
+ok('the + wrong word rejected', !checkAnswer('the minute', stunde, 'de-en').correct);
+ok('article alone rejected', !checkAnswer('the', stunde, 'de-en').correct);
+
+const jahrCard = words.find((w) => w.german === 'Jahr');
+ok('the year for Jahr', checkAnswer('the year', jahrCard, 'de-en').correct);
+ok('year for Jahr', checkAnswer('year', jahrCard, 'de-en').correct);
+
+// stripping applies to English answers only, never to German ones
+ok('en-de unaffected by the-strip', !checkAnswer('the Jahr', jahrCard, 'en-de', { requireArticle: true }).correct);
+
+// --- swapped letters count as one slip, not two
+const r2 = checkAnswer('huor', stunde, 'de-en');
+ok('transposition forgiven', r2.correct && r2.typo);
+ok('transposition in German too', checkAnswer('Jhar', jahr, 'en-de').correct);
+ok('two separate errors still rejected', !checkAnswer('huro', words.find(w => w.german === 'Ohr'), 'de-en').correct);
+
+// --- hints
+ok('mask reveals prefix', hintMask('Jahr', 1) === 'J···');
+ok('mask reveals two', hintMask('Jahr', 2) === 'Ja··');
+ok('mask keeps spaces', hintMask('to look for', 2) === 'to ···· ···');
+ok('mask level 0 hides all', hintMask('Haus', 0) === '····');
+ok('hintLength counts letters only', hintLength('to look for') === 9);
+
+const hausCard = makeCard(words.find((w) => w.german === 'Haus'), 'en-de');
+ok('hint hides the article', hintFor(hausCard, 1).startsWith('···'));
+ok('hint reveals first letter', hintFor(hausCard, 1) === '··· H···');
+ok('hintMax is word length', hintMax(hausCard) === 4);
+
+const jahrEn = makeCard(jahrCard, 'de-en');
+ok('en hint has no article slot', hintFor(jahrEn, 1) === 'y···');
+ok('en hintMax from first gloss', hintMax(jahrEn) === 4);
+
+// --- a hinted answer counts but must not stretch the interval
+const prog = {};
+recordResult(prog, 'x', 'good');
+const afterGood = { ...prog.x };
+recordResult(prog, 'x', 'hint');
+ok('hint counts as correct', prog.x.correct === 2);
+ok('hint leaves box alone', prog.x.box === afterGood.box);
+ok('hint records no wrong', prog.x.wrong === 0);
+recordResult(prog, 'x', 'good');
+ok('good still advances after hint', prog.x.box === afterGood.box + 1);
+
+const prog2 = {};
+recordResult(prog2, 'y', 'hint');
+ok('hint from scratch stays box 1', prog2.y.box === 1);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

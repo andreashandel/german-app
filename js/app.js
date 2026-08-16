@@ -2,7 +2,7 @@
 
 import { parseCsv, toWords, germanDisplay, englishDisplay, POS_VALUES, POS_LABELS } from './csv.js';
 import { selectWords, countByPos, shuffle, rankExtent } from './deck.js';
-import { checkAnswer, makeCard } from './quiz.js';
+import { checkAnswer, makeCard, hintFor, hintMax } from './quiz.js';
 import {
   loadProgress,
   saveProgress,
@@ -33,7 +33,7 @@ const state = {
     rangeMode: 'all',
     direction: 'de-en',
     allowTypos: true,
-    requireArticle: false,
+    requireArticle: true,
     showExamples: true,
     audio: false,
     sessionLength: 20,
@@ -212,8 +212,14 @@ function pickGermanVoice() {
   germanVoice = voices.find((v) => v.lang && v.lang.toLowerCase().startsWith('de')) || null;
 }
 
-function speakGerman(text) {
-  if (!state.settings.audio || !('speechSynthesis' in window) || !text) return;
+function speechAvailable() {
+  return 'speechSynthesis' in window;
+}
+
+/** `force` is the speaker button: it plays even when auto-speak is off. */
+function speakGerman(text, { force = false } = {}) {
+  if (!force && !state.settings.audio) return;
+  if (!speechAvailable() || !text) return;
   try {
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
@@ -286,6 +292,18 @@ function renderCard() {
   // it every card so a previous flashcard session cannot leave it hidden.
   $('btn-next').hidden = session.mode !== 'typing';
 
+  // A one-letter answer has nothing to hint at without giving itself away.
+  session.hintLevel = 0;
+  $('hint-line').hidden = true;
+  $('hint-line').textContent = '';
+  $('btn-hint').hidden = session.mode !== 'typing' || hintMax(card) < 2;
+  $('btn-hint').disabled = false;
+
+  // The speaker follows the German: it is the prompt one way round and the
+  // answer the other, so it only appears here when German is being shown.
+  $('btn-speak-prompt').hidden = !(speechAvailable() && card.dir === 'de-en');
+  $('btn-speak-answer').hidden = true;
+
   if (session.mode === 'typing') {
     // Focus only on a device with a real keyboard: pulling up the iPad
     // keyboard automatically hides half the card.
@@ -297,7 +315,7 @@ function renderCard() {
   if (card.dir === 'de-en') speakGerman(card.word.german);
 }
 
-function showFeedback({ correct, typo, missingArticle, wrongArticle }) {
+function showFeedback({ correct, typo, missingArticle, wrongArticle, hinted }) {
   const card = currentCard();
   const verdict = $('verdict');
 
@@ -305,6 +323,9 @@ function showFeedback({ correct, typo, missingArticle, wrongArticle }) {
   if (state.session.mode === 'flash') {
     verdict.textContent = '';
     verdict.className = 'verdict';
+  } else if (correct && hinted) {
+    verdict.textContent = 'Correct — with a hint';
+    verdict.className = 'verdict typo';
   } else if (correct && typo) {
     verdict.textContent = 'Close enough — check the spelling';
     verdict.className = 'verdict typo';
@@ -334,6 +355,7 @@ function showFeedback({ correct, typo, missingArticle, wrongArticle }) {
     exampleEl.textContent = '';
   }
 
+  $('btn-speak-answer').hidden = !(speechAvailable() && card.dir === 'en-de');
   $('feedback').hidden = false;
   if (card.dir === 'en-de') speakGerman(card.word.german);
 }
@@ -342,7 +364,7 @@ function gradeCard(grade) {
   const card = currentCard();
   recordResult(state.progress, card.word.id, grade);
   saveProgress(state.deckId, state.progress);
-  state.session.results.push({ card, correct: grade !== 'again' });
+  state.session.results.push({ card, correct: grade !== 'again', hinted: grade === 'hint' });
 }
 
 function nextCard() {
@@ -357,7 +379,9 @@ function finishSession() {
   const correct = results.filter((r) => r.correct).length;
   const missed = results.filter((r) => !r.correct);
 
-  $('summary-score').textContent = `${correct} of ${results.length} correct`;
+  const hinted = results.filter((r) => r.hinted).length;
+  $('summary-score').textContent =
+    `${correct} of ${results.length} correct` + (hinted ? ` · ${hinted} with a hint` : '');
   $('missed-heading').textContent = missed.length ? 'Words to review' : 'Nothing missed — nicely done';
 
   const list = $('missed-list');
@@ -564,10 +588,12 @@ function wireSession() {
       allowTypos: state.settings.allowTypos,
       requireArticle: state.settings.requireArticle,
     });
-    gradeCard(result.correct ? 'good' : 'again');
+    const hinted = state.session.hintLevel > 0;
+    gradeCard(result.correct ? (hinted ? 'hint' : 'good') : 'again');
     $('answer-input').disabled = true;
     $('btn-check').disabled = true;
-    showFeedback(result);
+    $('btn-hint').disabled = true;
+    showFeedback({ ...result, hinted });
     $('btn-next').focus();
   };
 
@@ -578,6 +604,21 @@ function wireSession() {
       submit();
     }
   });
+
+  // Each press uncovers one more letter, stopping one short of the whole word.
+  $('btn-hint').addEventListener('click', () => {
+    const card = currentCard();
+    const ceiling = hintMax(card) - 1;
+    state.session.hintLevel = Math.min(ceiling, state.session.hintLevel + 1);
+    $('hint-line').textContent = hintFor(card, state.session.hintLevel);
+    $('hint-line').hidden = false;
+    $('btn-hint').disabled = state.session.hintLevel >= ceiling;
+    $('answer-input').focus();
+  });
+
+  const speak = () => speakGerman(currentCard().word.german, { force: true });
+  $('btn-speak-prompt').addEventListener('click', speak);
+  $('btn-speak-answer').addEventListener('click', speak);
 
   $('accent-row').addEventListener('click', (e) => {
     const ch = e.target.dataset?.ch;
@@ -647,7 +688,16 @@ function wireBrowse() {
 /* ------------------------------------------------------------------ boot */
 
 async function init() {
-  Object.assign(state.settings, loadSettings());
+  const stored = loadSettings();
+  Object.assign(state.settings, stored);
+
+  // Requiring the article used to be opt-in and defaulted off. Anyone who
+  // practised before that changed has `false` saved, which would silently keep
+  // the old behaviour, so turn it on once and remember that we did.
+  if (!stored.articleDefaultApplied) {
+    state.settings.requireArticle = true;
+    state.settings.articleDefaultApplied = true;
+  }
   // A stored filter naming a type this deck lacks would silently select nothing.
   state.settings.posFilter = state.settings.posFilter.filter((p) => POS_VALUES.includes(p));
 

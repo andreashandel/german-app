@@ -100,8 +100,8 @@
               <span>Accept small typos</span>
             </label>
             <label class="check">
-              <input type="checkbox" id="opt-article" />
-              <span>Require the correct article (der/die/das) when typing nouns</span>
+              <input type="checkbox" id="opt-article" checked />
+              <span>Require the correct article (der/die/das) when typing German nouns</span>
             </label>
             <label class="check">
               <input type="checkbox" id="opt-examples" checked />
@@ -160,7 +160,17 @@
 
         <div class="card quiz">
           <p class="dir-label" id="card-direction">German → English</p>
-          <p class="prompt" id="card-prompt"></p>
+          <p class="prompt">
+            <span id="card-prompt"></span>
+            <button
+              type="button"
+              class="speak-btn"
+              id="btn-speak-prompt"
+              aria-label="Hear the German word"
+              title="Hear it"
+              hidden
+            >🔊</button>
+          </p>
           <p class="prompt-extra" id="card-extra"></p>
 
           <!-- typing mode -->
@@ -182,7 +192,11 @@
               <button type="button" data-ch="ü">ü</button>
               <button type="button" data-ch="ß">ß</button>
             </div>
-            <button type="button" class="primary wide" id="btn-check">Check</button>
+            <p class="hint-line" id="hint-line" hidden></p>
+            <div class="check-row">
+              <button type="button" class="secondary" id="btn-hint">Hint</button>
+              <button type="button" class="primary" id="btn-check">Check</button>
+            </div>
           </div>
 
           <!-- flashcard mode -->
@@ -197,7 +211,17 @@
 
           <div id="feedback" class="feedback" hidden>
             <p class="verdict" id="verdict"></p>
-            <p class="answer" id="correct-answer"></p>
+            <p class="answer">
+              <span id="correct-answer"></span>
+              <button
+                type="button"
+                class="speak-btn"
+                id="btn-speak-answer"
+                aria-label="Hear the German word"
+                title="Hear it"
+                hidden
+              >🔊</button>
+            </p>
             <p class="example" id="example-line"></p>
             <button type="button" class="secondary wide" id="btn-next">Next</button>
           </div>

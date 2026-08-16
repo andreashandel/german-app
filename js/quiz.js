@@ -28,19 +28,31 @@ export function normalise(text) {
     .trim();
 }
 
-/** Levenshtein distance, used only to forgive single-character typos. */
+/**
+ * Damerau-Levenshtein distance, used only to forgive small typos.
+ *
+ * Counting a swap of neighbouring letters as one slip rather than two matters
+ * here: "huor" for "hour" is exactly what a thumb does on a tablet keyboard,
+ * and under plain Levenshtein it would cost 2 and blow the budget for any word
+ * shorter than twelve characters.
+ */
 function editDistance(a, b) {
   if (a === b) return 0;
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
 
+  let prevPrev = [];
   let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
   for (let i = 1; i <= a.length; i++) {
     const curr = [i];
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
       curr[j] = Math.min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        curr[j] = Math.min(curr[j], prevPrev[j - 2] + 1);
+      }
     }
+    prevPrev = prev;
     prev = curr;
   }
   return prev[b.length];
@@ -128,17 +140,76 @@ export function checkAnswer(input, word, dir, opts = {}) {
       ? new Set([normalise(word.german)])
       : acceptedAnswers(word, dir, { requireArticle });
 
-  if (accepted.has(guess)) return { correct: true, typo: false };
+  // Answering an English noun as "the year" is as right as "year", so try the
+  // guess again with a leading English article removed.
+  const guesses = [guess];
+  if (dir === 'de-en') {
+    const bare = guess.replace(/^(the|a|an)\s+/, '');
+    if (bare && bare !== guess) guesses.push(bare);
+  }
+
+  for (const g of guesses) {
+    if (accepted.has(g)) return { correct: true, typo: false };
+  }
 
   if (allowTypos) {
-    for (const answer of accepted) {
-      if (editDistance(guess, answer) <= typoBudget(answer)) {
-        return { correct: true, typo: true };
+    for (const g of guesses) {
+      for (const answer of accepted) {
+        if (editDistance(g, answer) <= typoBudget(answer)) {
+          return { correct: true, typo: true };
+        }
       }
     }
   }
 
   return { correct: false, typo: false };
+}
+
+/* ------------------------------------------------------------------ hints */
+
+const LETTER = /[\p{L}\p{N}]/u;
+
+/** Reveal the first `level` letters of `text`; mask the rest, keeping spacing. */
+export function hintMask(text, level) {
+  let shown = 0;
+  let out = '';
+  for (const ch of text) {
+    if (!LETTER.test(ch)) {
+      out += ch;
+    } else if (shown < level) {
+      out += ch;
+      shown += 1;
+    } else {
+      out += '·';
+    }
+  }
+  return out;
+}
+
+/** Letters available to reveal — one past this and the hint is the answer. */
+export function hintLength(text) {
+  return [...text].filter((ch) => LETTER.test(ch)).length;
+}
+
+/** The word a hint uncovers: the first English gloss, or the German headword. */
+function hintSource(card) {
+  return card.dir === 'de-en' ? card.word.english[0] || '' : card.word.german;
+}
+
+export function hintMax(card) {
+  return hintLength(hintSource(card));
+}
+
+/**
+ * A partially revealed answer.
+ *
+ * A noun's article is never uncovered by a hint. The gender is the thing being
+ * tested, so handing it over would defeat the exercise — the placeholder stays
+ * in front as a reminder that it is still owed.
+ */
+export function hintFor(card, level) {
+  const masked = hintMask(hintSource(card), level);
+  return card.dir === 'en-de' && card.word.article ? `··· ${masked}` : masked;
 }
 
 /** What the card shows as the correct answer once it is revealed. */

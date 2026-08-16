@@ -37,7 +37,8 @@ export function saveProgress(deckId, progress) {
 
 /**
  * Fold one answer into the record.
- * grade: 'again' | 'good' | 'easy'. A typed answer maps to again/good.
+ * grade: 'again' | 'hint' | 'good' | 'easy'. A typed answer maps to again/good,
+ * or to 'hint' if she uncovered part of the answer before typing it.
  */
 export function recordResult(progress, wordId, grade) {
   const rec = progress[wordId] ? { ...progress[wordId] } : emptyRecord();
@@ -49,6 +50,10 @@ export function recordResult(progress, wordId, grade) {
   if (grade === 'again') {
     rec.wrong += 1;
     rec.box = 1;
+  } else if (grade === 'hint') {
+    // Right, but with help: it counts, yet the interval must not stretch or she
+    // would stop seeing a word she cannot actually recall unaided.
+    rec.correct += 1;
   } else {
     rec.correct += 1;
     rec.box = Math.min(MAX_BOX, rec.box + (grade === 'easy' ? 2 : 1));

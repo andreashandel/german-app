@@ -38,7 +38,20 @@ window.URL.revokeObjectURL = () => {};
 
 // navigator is a getter-only global in Node; the app only probes it for
 // serviceWorker support, which correctly reports false here.
-for (const key of ['document', 'localStorage', 'fetch', 'Blob', 'confirm', 'Event']) {
+// Speech is absent from jsdom; stub it so the speaker buttons are exercisable.
+const spoken = [];
+window.speechSynthesis = {
+  getVoices: () => [{ lang: 'de-DE', name: 'Test German' }],
+  speak: (u) => spoken.push(u.text),
+  cancel: () => {},
+  addEventListener: () => {},
+};
+window.SpeechSynthesisUtterance = class {
+  constructor(text) { this.text = text; }
+};
+
+for (const key of ['document', 'localStorage', 'fetch', 'Blob', 'confirm', 'Event',
+                   'speechSynthesis', 'SpeechSynthesisUtterance']) {
   globalThis[key] = window[key];
 }
 globalThis.window = window;
@@ -52,6 +65,8 @@ await import('../js/app.js');
 await settle();
 
 /* ------------------------------------------------------------ setup screen */
+
+ok('article required by default', $('opt-article').checked === true);
 
 ok('deck loaded', $('deck-summary').textContent === '500 words loaded', $('deck-summary').textContent);
 ok('deck option present', $('deck-select').options.length >= 1);
@@ -242,6 +257,96 @@ await settle();
 ok('typing after flash: advances', $('session-counter').textContent === '2 / 10', $('session-counter').textContent);
 $('btn-quit').click();
 await settle();
+
+/* ------------------------------------------------ hints and pronunciation */
+
+// Force German → English so the prompt side is the one carrying the speaker.
+window.document.querySelector('input[name="direction"][value="de-en"]').checked = true;
+fire(window.document.querySelector('input[name="direction"][value="de-en"]'), 'change');
+$('btn-typing').click();
+await settle();
+
+ok('hint hidden until asked', $('hint-line').hidden === true);
+ok('hint button offered', $('btn-hint').hidden === false);
+
+$('btn-hint').click();
+await settle();
+ok('hint appears', $('hint-line').hidden === false);
+const firstHint = $('hint-line').textContent;
+ok('hint masks with dots', firstHint.includes('·'), firstHint);
+ok('hint reveals one letter', firstHint.replace(/[^·]/g, '').length === firstHint.replace(/\s/g, '').length - 1, firstHint);
+
+$('btn-hint').click();
+await settle();
+const secondHint = $('hint-line').textContent;
+ok('second hint reveals more', secondHint.replace(/[^·]/g, '').length < firstHint.replace(/[^·]/g, '').length,
+  firstHint + ' -> ' + secondHint);
+
+// keep pressing; it must stop one short of spelling the whole answer
+for (let i = 0; i < 30 && !$('btn-hint').disabled; i++) $('btn-hint').click();
+await settle();
+ok('hint stops short of the answer', $('hint-line').textContent.includes('·'), $('hint-line').textContent);
+ok('hint button disables at the ceiling', $('btn-hint').disabled === true);
+
+// answering after a hint must not re-enable hinting for that card
+$('answer-input').value = $('hint-line').textContent.replace(/·/g, '') + 'zzz';
+$('btn-check').click();
+await settle();
+ok('hint locks out further hints', $('btn-hint').disabled === true);
+
+$('btn-next').click();
+await settle();
+$('btn-hint').click();
+await settle();
+$('answer-input').value = '';
+$('btn-check').click();
+await settle();
+ok('hint verdict distinct', $('verdict').textContent.length > 0);
+
+$('btn-quit').click();
+await settle();
+
+/* ---- speaker buttons ---- */
+
+$('btn-typing').click();
+await settle();
+const spokenBefore = spoken.length;
+ok('auto-speak off by default', spokenBefore === 0, String(spokenBefore));
+ok('prompt speaker shown on de-en', $('btn-speak-prompt').hidden === false);
+ok('answer speaker hidden before reveal', $('btn-speak-answer').hidden === true);
+
+$('btn-speak-prompt').click();
+await settle();
+ok('speaker button speaks', spoken.length === spokenBefore + 1, String(spoken.length));
+ok('speaks the German headword', /\w/.test(spoken[spoken.length - 1] || ''), spoken[spoken.length - 1]);
+
+$('answer-input').value = 'nope';
+$('btn-check').click();
+await settle();
+ok('answer speaker stays hidden on de-en', $('btn-speak-answer').hidden === true);
+$('btn-quit').click();
+await settle();
+
+// English → German puts the German on the answer side
+window.document.querySelector('input[name="direction"][value="en-de"]').checked = true;
+fire(window.document.querySelector('input[name="direction"][value="en-de"]'), 'change');
+$('btn-typing').click();
+await settle();
+ok('prompt speaker hidden on en-de', $('btn-speak-prompt').hidden === true);
+$('answer-input').value = 'nope';
+$('btn-check').click();
+await settle();
+ok('answer speaker shown on en-de', $('btn-speak-answer').hidden === false);
+const beforeAnswerSpeak = spoken.length;
+$('btn-speak-answer').click();
+await settle();
+ok('answer speaker speaks', spoken.length === beforeAnswerSpeak + 1);
+
+// with the article required, a bare noun is now rejected
+$('btn-quit').click();
+await settle();
+ok('requireArticle persisted true', JSON.parse(window.localStorage.getItem('germanapp:settings:v1')).requireArticle === true);
+ok('migration flag written', JSON.parse(window.localStorage.getItem('germanapp:settings:v1')).articleDefaultApplied === true);
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

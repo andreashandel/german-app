@@ -21,7 +21,8 @@ types you want. The radio buttons underneath decide what those numbers mean:
 
 **How to practise.**
 
-- **Typing** — type the translation and get it checked (see below).
+- **Typing** — type the translation and get it checked (see below). **Hint**
+  uncovers a letter at a time if she is stuck.
 - **Flashcards** — reveal the answer, then grade yourself *Again / Good / Easy*.
   The grade feeds the review scheduler.
 - **Browse** — the current selection as a sortable, searchable table.
@@ -39,12 +40,42 @@ an iPad keyboard:
 - Umlauts match three ways — `grün`, `gruen` and `grun` are all accepted.
 - `ß` and `ss` are interchangeable.
 - Any one of several translations counts: `to look for; to search` accepts either.
-- A leading `to ` or `a/an/the` is optional: `go` is fine for `to go`.
+- A leading `to ` or `a/an/the` is optional in both directions: `go` is fine for
+  `to go`, and `the hour` is fine for `hour`.
 - Parentheticals are optional: `the` is fine for `the (masculine)`.
 - Small typos are forgiven by default (one character, two on long words), and
-  flagged so you still see the correct spelling. Turn this off under *Options*.
-- Articles are **never** fuzzy-matched. With *Require the correct article* on,
-  `der Haus` is wrong — that setting exists precisely to test gender.
+  flagged so you still see the correct spelling. Swapped neighbouring letters
+  count as one slip, not two, since `huor` for `hour` is what a thumb does on a
+  tablet. Turn all of this off under *Options*.
+
+German nouns are the exception. **The article is required** — `Haus` alone is
+marked wrong, and only `das Haus` counts. Articles are never fuzzy-matched
+either, so `der Haus` is a miss rather than a forgiven typo: the gender *is* the
+thing being tested. Untick *Require the correct article* under *Options* to go
+back to accepting a bare noun.
+
+### Hints and pronunciation
+
+**Hint** uncovers the answer one letter at a time — `····` becomes `J···`, then
+`Ja··`. It stops one letter short, so it can never simply spell the word out. A
+noun's article is never revealed by a hint, for the same reason it is required:
+the placeholder `···` stays in front as a reminder that the gender is still
+owed.
+
+Getting a word right after a hint still counts as correct, but it does not push
+the word further down the review schedule — she got there with help, and a word
+she cannot recall unaided should come back around soon. The session summary
+counts how many answers needed one.
+
+**🔊** next to a German word reads it aloud, using the German voice already on
+the device. It sits beside the prompt when translating out of German, and beside
+the answer when translating into it, so it always follows the German side. There
+is also a *Read the German word aloud* option that plays every card
+automatically without pressing anything.
+
+Pronunciation needs no network and no API key, but it does depend on the device
+having a German voice — every current iPad does. Where speech is unavailable the
+buttons simply do not appear.
 
 ## Adding your own word list
 
