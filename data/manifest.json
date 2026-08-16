@@ -3,5 +3,20 @@
     "id": "de-top500",
     "name": "German — 500 most common words",
     "file": "data/de-top500.csv"
+  },
+  {
+    "id": "de-numbers",
+    "name": "Numbers & counting",
+    "file": "data/de-numbers.csv"
+  },
+  {
+    "id": "de-food",
+    "name": "Food & eating out",
+    "file": "data/de-food.csv"
+  },
+  {
+    "id": "de-time",
+    "name": "Time, days & months",
+    "file": "data/de-time.csv"
   }
 ]

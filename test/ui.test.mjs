@@ -25,8 +25,11 @@ const { window } = dom;
 window.fetch = async (url) => {
   const rel = String(url).replace(/^https?:\/\/localhost:8765\//, '');
   const file = path.join(ROOT, rel);
-  if (!fs.existsSync(file)) return { ok: false, status: 404, text: async () => '' };
-  return { ok: true, status: 200, text: async () => fs.readFileSync(file, 'utf8') };
+  if (!fs.existsSync(file)) {
+    return { ok: false, status: 404, text: async () => '', json: async () => { throw new Error('404'); } };
+  }
+  const body = fs.readFileSync(file, 'utf8');
+  return { ok: true, status: 200, text: async () => body, json: async () => JSON.parse(body) };
 };
 
 // Not implemented by jsdom; the app only asks whether it has a fine pointer.
@@ -347,6 +350,69 @@ $('btn-quit').click();
 await settle();
 ok('requireArticle persisted true', JSON.parse(window.localStorage.getItem('germanapp:settings:v1')).requireArticle === true);
 ok('migration flag written', JSON.parse(window.localStorage.getItem('germanapp:settings:v1')).articleDefaultApplied === true);
+
+/* ------------------------------------------------------ switching decks -- */
+
+const topKey = 'germanapp:progress:v1:builtin:de-top500';
+const topCountBefore = Object.keys(JSON.parse(window.localStorage.getItem(topKey))).length;
+
+const deckSel = $('deck-select');
+const builtinOpts = [...deckSel.options].filter((o) => o.value.startsWith('builtin:'));
+ok('all four decks offered', builtinOpts.length === 4, String(builtinOpts.length));
+ok('food deck listed', builtinOpts.some((o) => o.value === 'builtin:de-food'));
+ok('numbers deck listed', builtinOpts.some((o) => o.value === 'builtin:de-numbers'));
+ok('time deck listed', builtinOpts.some((o) => o.value === 'builtin:de-time'));
+
+deckSel.value = 'builtin:de-food';
+fire(deckSel, 'change');
+await settle();
+ok('food deck loaded', $('deck-summary').textContent === '130 words loaded', $('deck-summary').textContent);
+
+$('btn-pos-all').click();
+$('range-start').value = '1'; fire($('range-start'), 'input');
+$('range-end').value = '130'; fire($('range-end'), 'input');
+await settle();
+ok('food range selects all 130', $('selection-count').textContent.startsWith('130 words'), $('selection-count').textContent);
+
+// the pos filter must rebuild for a deck with a different mix of types
+const foodTypes = [...$('pos-filter').querySelectorAll('.check')].map((c) => c.textContent);
+ok('food filter drops unused types', foodTypes.length < 9 && foodTypes.length >= 3, String(foodTypes.length));
+
+// a session on the new deck runs, and writes to its own progress key
+$('opt-length').value = '10'; fire($('opt-length'), 'change');
+$('btn-typing').click();
+await settle();
+ok('food session starts', $('screen-session').hidden === false);
+ok('food counter', $('session-counter').textContent === '1 / 10', $('session-counter').textContent);
+$('answer-input').value = 'wrong';
+$('btn-check').click();
+await settle();
+ok('food card grades', $('feedback').hidden === false);
+$('btn-quit').click();
+await settle();
+
+const foodKey = 'germanapp:progress:v1:builtin:de-food';
+ok('food progress stored separately', window.localStorage.getItem(foodKey) !== null);
+ok('top500 progress untouched by food session',
+  Object.keys(JSON.parse(window.localStorage.getItem(topKey))).length === topCountBefore,
+  String(Object.keys(JSON.parse(window.localStorage.getItem(topKey))).length));
+
+// numbers deck: the range selector must cope with a deck of numerals
+deckSel.value = 'builtin:de-numbers';
+fire(deckSel, 'change');
+await settle();
+ok('numbers deck loaded', $('deck-summary').textContent === '115 words loaded', $('deck-summary').textContent);
+$('btn-pos-none').click();
+const numBox = [...$('pos-filter').querySelectorAll('input')].find((i) => i.value === 'numeral');
+ok('numeral type offered', Boolean(numBox));
+numBox.checked = true; fire(numBox, 'change');
+await settle();
+ok('numerals selectable', /^\d+ words/.test($('selection-count').textContent), $('selection-count').textContent);
+
+deckSel.value = 'builtin:de-time';
+fire(deckSel, 'change');
+await settle();
+ok('time deck loaded', $('deck-summary').textContent === '120 words loaded', $('deck-summary').textContent);
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

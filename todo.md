@@ -1,0 +1,3 @@
+- Add option to hear pronounciation of german example sentences.
+- Add streak feature.
+- 

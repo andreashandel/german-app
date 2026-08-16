@@ -1,7 +1,7 @@
 // Offline support. Bump CACHE when any file below changes so the old cache is
 // dropped — otherwise an updated word list would never reach a device that has
 // already installed the app.
-const CACHE = 'german-app-v2';
+const CACHE = 'german-app-v3';
 
 const ASSETS = [
   '.',
@@ -14,6 +14,9 @@ const ASSETS = [
   'js/progress.js',
   'data/manifest.json',
   'data/de-top500.csv',
+  'data/de-numbers.csv',
+  'data/de-food.csv',
+  'data/de-time.csv',
   'manifest.webmanifest',
   'icons/icon-180.png',
   'icons/icon-192.png',

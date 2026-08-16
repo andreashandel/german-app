@@ -1,8 +1,9 @@
 # German Vocabulary
 
-A small web app for practising German vocabulary. Pick a slice of the frequency
-list, choose which kinds of words you want, and drill them by typing or with
-flashcards — in either translation direction.
+A small web app for practising German vocabulary. Pick a word list, take a slice
+of it, choose which kinds of words you want, and drill them by typing or with
+flashcards — in either translation direction. Four lists are built in (the 500
+most common words, plus numbers, food and time), and you can load your own.
 
 Live at **https://andreashandel.github.io/german-app**
 
@@ -11,8 +12,9 @@ runtime dependencies. Open `index.html` through any web server and it runs.
 
 ## Using it
 
-**Which words.** Set a `From`–`To` range over the word list and tick the word
-types you want. The radio buttons underneath decide what those numbers mean:
+**Which words.** Pick a list from the dropdown, set a `From`–`To` range over it,
+and tick the word types you want. The radio buttons underneath decide what those
+numbers mean:
 
 - *positions on the full list* — `200`–`400` is literally ranks 200 to 400,
   then narrowed to the types you ticked.
@@ -128,21 +130,36 @@ Save as UTF-8. Quote any field containing a comma. If two entries share a
 headword they must differ in `pos` — that is how `das Essen` (noun) and `essen`
 (verb) stay separate, including in your progress history.
 
-### A note on the bundled list
+### The bundled lists
 
-`data/de-top500.csv` is 500 words, each with part of speech, gender and plural
-for nouns, and a German example sentence with translation.
+Four decks ship with the app, picked from the dropdown at the top of the setup
+screen. Every entry in all of them carries a part of speech, gender and plural
+for nouns, and a German example sentence with its translation.
 
-`rank` is a **learner-priority order, weighted by frequency** — not exact corpus
-positions. Roughly the first 150 track real frequency closely, which is why they
-are mostly function words (*der, und, zu, nicht*); those are worth knowing and
-their example sentences carry most of the teaching. Beyond that the list leans
-toward everyday vocabulary a beginner will actually use, rather than the
-news-corpus words (*Unternehmen, Bereich, Milliarde*) that dominate a strict
-frequency count in that band.
+| Deck | Words | What it covers |
+| ---- | ----- | -------------- |
+| **German — 500 most common words** | 500 | General vocabulary, ordered by frequency |
+| **Numbers & counting** | 115 | Cardinals, ordinals, fractions, units, quantity words |
+| **Food & eating out** | 130 | Ordering, meals, ingredients, cooking, tableware |
+| **Time, days & months** | 120 | Clock units, weekdays, months, seasons, time adverbs |
 
-Translations were compiled by hand and are worth a review pass. It is a plain
-CSV — fix anything that looks off and commit it.
+Each deck keeps its own progress history, so practising food words does not
+disturb where you are in the main list.
+
+The three topic decks are ordered by theme rather than frequency — the range
+selector still works, it just means "the first 40 of the food deck" is the
+restaurant-and-meals block rather than the commonest 40 food words.
+
+On the main list, `rank` is a **learner-priority order, weighted by frequency** —
+not exact corpus positions. Roughly the first 150 track real frequency closely,
+which is why they are mostly function words (*der, und, zu, nicht*); those are
+worth knowing and their example sentences carry most of the teaching. Beyond
+that the list leans toward everyday vocabulary a beginner will actually use,
+rather than the news-corpus words (*Unternehmen, Bereich, Milliarde*) that
+dominate a strict frequency count in that band.
+
+Translations were compiled by hand and are worth a review pass. They are plain
+CSVs — fix anything that looks off and commit it.
 
 ## On an iPad
 
