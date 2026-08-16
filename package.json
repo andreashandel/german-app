@@ -1,0 +1,16 @@
+{
+  "name": "german-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "German vocabulary trainer. The app itself has no dependencies and no build step — this file exists only so the tests can run.",
+  "scripts": {
+    "test": "node test/logic.test.mjs && node test/ui.test.mjs",
+    "test:logic": "node test/logic.test.mjs",
+    "test:ui": "node test/ui.test.mjs",
+    "start": "python -m http.server 8765"
+  },
+  "devDependencies": {
+    "jsdom": "^27.0.0"
+  }
+}

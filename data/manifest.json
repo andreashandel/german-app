@@ -1,0 +1,7 @@
+[
+  {
+    "id": "de-top500",
+    "name": "German — 500 most common words",
+    "file": "data/de-top500.csv"
+  }
+]

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>German Vocabulary</title>
+    <meta name="description" content="Practice the most common German words." />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1f6f5c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="German" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="icon" href="icons/icon-192.png" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- ============================ SETUP ============================ -->
+      <section id="screen-setup" class="screen">
+        <header class="app-header">
+          <h1>German Vocabulary</h1>
+          <p class="sub" id="deck-summary">Loading…</p>
+        </header>
+
+        <div class="card">
+          <label class="field">
+            <span class="field-label">Word list</span>
+            <select id="deck-select"></select>
+          </label>
+          <div class="row">
+            <button type="button" class="ghost" id="btn-load-csv">Load a CSV file…</button>
+            <input type="file" id="file-input" accept=".csv,text/csv" hidden />
+          </div>
+          <p class="hint" id="deck-note"></p>
+        </div>
+
+        <div class="card">
+          <h2>Which words</h2>
+
+          <div class="range-row">
+            <label class="field">
+              <span class="field-label">From</span>
+              <input type="number" id="range-start" min="1" value="1" inputmode="numeric" />
+            </label>
+            <label class="field">
+              <span class="field-label">To</span>
+              <input type="number" id="range-end" min="1" value="100" inputmode="numeric" />
+            </label>
+          </div>
+
+          <fieldset class="seg">
+            <legend class="field-label">Numbers count</legend>
+            <label class="seg-opt">
+              <input type="radio" name="rangeMode" value="all" checked />
+              <span>positions on the full list</span>
+            </label>
+            <label class="seg-opt">
+              <input type="radio" name="rangeMode" value="filter" />
+              <span>positions within the chosen types</span>
+            </label>
+          </fieldset>
+          <p class="hint" id="range-hint"></p>
+
+          <fieldset class="pos-grid" id="pos-filter">
+            <legend class="field-label">Word types</legend>
+          </fieldset>
+          <div class="row">
+            <button type="button" class="ghost small" id="btn-pos-all">Select all</button>
+            <button type="button" class="ghost small" id="btn-pos-none">Clear</button>
+            <button type="button" class="ghost small" id="btn-pos-core">Nouns + verbs + adjectives</button>
+          </div>
+
+          <p class="count" id="selection-count">—</p>
+        </div>
+
+        <div class="card">
+          <h2>How to practice</h2>
+
+          <fieldset class="seg">
+            <legend class="field-label">Direction</legend>
+            <label class="seg-opt">
+              <input type="radio" name="direction" value="de-en" checked />
+              <span>German → English</span>
+            </label>
+            <label class="seg-opt">
+              <input type="radio" name="direction" value="en-de" />
+              <span>English → German</span>
+            </label>
+            <label class="seg-opt">
+              <input type="radio" name="direction" value="mixed" />
+              <span>Mixed</span>
+            </label>
+          </fieldset>
+
+          <details class="options">
+            <summary>Options</summary>
+            <label class="check">
+              <input type="checkbox" id="opt-typos" checked />
+              <span>Accept small typos</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="opt-article" />
+              <span>Require the correct article (der/die/das) when typing nouns</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="opt-examples" checked />
+              <span>Show the example sentence after answering</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="opt-audio" />
+              <span>Read the German word aloud</span>
+            </label>
+            <label class="field">
+              <span class="field-label">Words per session</span>
+              <select id="opt-length">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+                <option value="0">All selected</option>
+              </select>
+            </label>
+          </details>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="primary" id="btn-typing">Typing practice</button>
+          <button type="button" class="primary" id="btn-flash">Flashcards</button>
+          <button type="button" class="secondary" id="btn-browse">Browse the list</button>
+        </div>
+
+        <div class="card">
+          <h2>Your progress</h2>
+          <p class="stats" id="progress-stats">—</p>
+          <div class="row wrap">
+            <button type="button" class="ghost small" id="btn-due">Review what is due</button>
+            <button type="button" class="ghost small" id="btn-hard">Practice hard words</button>
+          </div>
+          <div class="row wrap">
+            <button type="button" class="ghost small" id="btn-export">Export progress</button>
+            <button type="button" class="ghost small" id="btn-import">Import progress</button>
+            <input type="file" id="import-input" accept=".json,application/json" hidden />
+            <button type="button" class="ghost small danger" id="btn-reset">Reset this deck</button>
+          </div>
+        </div>
+
+        <footer class="app-footer">
+          <p>Works offline once loaded. On an iPad, use Share → Add to Home Screen.</p>
+        </footer>
+      </section>
+
+      <!-- =========================== SESSION =========================== -->
+      <section id="screen-session" class="screen" hidden>
+        <header class="session-bar">
+          <button type="button" class="icon-btn" id="btn-quit" aria-label="Back to setup">‹</button>
+          <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="counter" id="session-counter">0 / 0</span>
+        </header>
+
+        <div class="card quiz">
+          <p class="dir-label" id="card-direction">German → English</p>
+          <p class="prompt" id="card-prompt"></p>
+          <p class="prompt-extra" id="card-extra"></p>
+
+          <!-- typing mode -->
+          <div id="typing-area">
+            <input
+              type="text"
+              id="answer-input"
+              autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+              enterkeyhint="go"
+              placeholder="Your answer"
+              aria-label="Your answer"
+            />
+            <div class="accent-row" id="accent-row">
+              <button type="button" data-ch="ä">ä</button>
+              <button type="button" data-ch="ö">ö</button>
+              <button type="button" data-ch="ü">ü</button>
+              <button type="button" data-ch="ß">ß</button>
+            </div>
+            <button type="button" class="primary wide" id="btn-check">Check</button>
+          </div>
+
+          <!-- flashcard mode -->
+          <div id="flash-area" hidden>
+            <button type="button" class="primary wide" id="btn-reveal">Show answer</button>
+            <div id="grade-row" class="grade-row" hidden>
+              <button type="button" class="grade again" data-grade="again">Again</button>
+              <button type="button" class="grade good" data-grade="good">Good</button>
+              <button type="button" class="grade easy" data-grade="easy">Easy</button>
+            </div>
+          </div>
+
+          <div id="feedback" class="feedback" hidden>
+            <p class="verdict" id="verdict"></p>
+            <p class="answer" id="correct-answer"></p>
+            <p class="example" id="example-line"></p>
+            <button type="button" class="secondary wide" id="btn-next">Next</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================== SUMMARY =========================== -->
+      <section id="screen-summary" class="screen" hidden>
+        <header class="app-header">
+          <h1>Session complete</h1>
+          <p class="sub" id="summary-score"></p>
+        </header>
+        <div class="card">
+          <h2 id="missed-heading">Words to review</h2>
+          <ul class="missed-list" id="missed-list"></ul>
+        </div>
+        <div class="actions">
+          <button type="button" class="primary" id="btn-retry-missed">Practice the missed words</button>
+          <button type="button" class="secondary" id="btn-again-same">Same settings again</button>
+          <button type="button" class="ghost" id="btn-to-setup">Back to setup</button>
+        </div>
+      </section>
+
+      <!-- ============================ BROWSE =========================== -->
+      <section id="screen-browse" class="screen" hidden>
+        <header class="session-bar">
+          <button type="button" class="icon-btn" id="btn-browse-back" aria-label="Back to setup">‹</button>
+          <h2 class="browse-title" id="browse-title">Word list</h2>
+        </header>
+        <div class="card">
+          <input
+            type="search"
+            id="browse-search"
+            placeholder="Filter these words…"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <div class="table-scroll">
+            <table class="word-table">
+              <thead>
+                <tr>
+                  <th data-sort="rank" class="num">#</th>
+                  <th data-sort="german">German</th>
+                  <th data-sort="english">English</th>
+                  <th data-sort="pos">Type</th>
+                </tr>
+              </thead>
+              <tbody id="browse-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
