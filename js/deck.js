@@ -2,25 +2,25 @@
 // they actually practise.
 
 /**
- * Apply the part-of-speech filter and the rank range.
+ * Apply the part-of-speech filter, then take a slice of what is left.
  *
- * rangeMode decides what "words 200-400" means:
- *   'all'    - positions on the full frequency list, then keep the chosen types
- *   'filter' - keep the chosen types first, then take the 200th-400th of those
- *              (so "nouns, 1-100" gives the 100 most common nouns)
+ * The range counts positions among the chosen types, so "nouns, 1-100" means
+ * the 100 most common nouns. With every type chosen it is simply positions on
+ * the full list, which is why this used to be a user-facing choice: on a deck
+ * with contiguous ranks the two readings agree exactly whenever nothing is
+ * filtered out, so the setting did nothing most of the time.
+ *
+ * Slicing positionally rather than matching rank values also means the count is
+ * always predictable, and a custom CSV with gaps in its `rank` column still
+ * yields a sensible selection.
  */
-export function selectWords(words, { posFilter, start, end, rangeMode }) {
+export function selectWords(words, { posFilter, start, end }) {
   const byRank = [...words].sort((a, b) => a.rank - b.rank);
   // A null filter means "every type". An empty array means the user has
   // unticked everything, which selects nothing rather than silently everything.
   const wantPos = (w) => !posFilter || posFilter.includes(w.pos);
 
-  if (rangeMode === 'filter') {
-    const filtered = byRank.filter(wantPos);
-    return filtered.slice(Math.max(0, start - 1), end);
-  }
-
-  return byRank.filter((w) => w.rank >= start && w.rank <= end).filter(wantPos);
+  return byRank.filter(wantPos).slice(Math.max(0, start - 1), end);
 }
 
 /** How many words each type contributes, for the live counts on the setup screen. */

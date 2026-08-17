@@ -62,20 +62,30 @@ ok('empty rejected', !checkAnswer('   ', jahr, 'en-de').correct);
 ok('far-off word rejected', !checkAnswer('Haus', jahr, 'en-de').correct);
 
 // --- selection
-const nounsTop100 = selectWords(words, { posFilter: ['noun'], start: 1, end: 100, rangeMode: 'filter' });
-ok('filter mode gives 100 nouns', nounsTop100.length === 100 && nounsTop100.every(w => w.pos === 'noun'));
-ok('filter mode starts at most common noun', nounsTop100[0].german === 'Jahr');
+// The range always counts positions among the chosen types.
+const nounsTop100 = selectWords(words, { posFilter: ['noun'], start: 1, end: 100 });
+ok('nouns 1-100 gives 100 nouns', nounsTop100.length === 100 && nounsTop100.every(w => w.pos === 'noun'));
+ok('starts at the most common noun', nounsTop100[0].german === 'Jahr');
+ok('nouns stay in frequency order',
+  nounsTop100.every((w, i) => i === 0 || nounsTop100[i - 1].rank < w.rank));
 
-const allRange = selectWords(words, { posFilter: ['noun'], start: 1, end: 100, rangeMode: 'all' });
-ok('all mode is a subset of rank window', allRange.every(w => w.rank <= 100 && w.pos === 'noun'));
-ok('all mode smaller than filter mode', allRange.length < nounsTop100.length);
-
-const range200_400 = selectWords(words, { posFilter: null, start: 200, end: 400, rangeMode: 'all' });
+// With every type chosen, positions and ranks coincide on a contiguous deck --
+// which is exactly why the mode selector was removable.
+const range200_400 = selectWords(words, { posFilter: null, start: 200, end: 400 });
 ok('200-400 gives 201 words', range200_400.length === 201);
-ok('200-400 respects bounds', range200_400[0].rank === 200 && range200_400[200].rank === 400);
+ok('200-400 lines up with ranks', range200_400[0].rank === 200 && range200_400[200].rank === 400);
 
-const verbsAndNouns = selectWords(words, { posFilter: ['verb', 'noun'], start: 1, end: 500, rangeMode: 'all' });
+// The selection width is now predictable regardless of the filter.
+ok('width matches the slider span', selectWords(words, { posFilter: ['verb'], start: 10, end: 40 }).length === 31);
+ok('range beyond the pool just stops',
+  selectWords(words, { posFilter: ['article'], start: 1, end: 100 }).length === 4);
+ok('start past the pool selects nothing',
+  selectWords(words, { posFilter: ['article'], start: 50, end: 100 }).length === 0);
+
+const verbsAndNouns = selectWords(words, { posFilter: ['verb', 'noun'], start: 1, end: 500 });
 ok('two-type filter', verbsAndNouns.length === 108 + 242);
+ok('two-type filter keeps only those types',
+  verbsAndNouns.every((w) => w.pos === 'verb' || w.pos === 'noun'));
 
 const counts = countByPos(words);
 ok('counts sum to 500', Object.values(counts).reduce((a, b) => a + b, 0) === 500);

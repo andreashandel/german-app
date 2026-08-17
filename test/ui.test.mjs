@@ -89,17 +89,43 @@ $('range-end').value = '400'; fire($('range-end'), 'input');
 await settle();
 ok('200-400 selects 201', $('selection-count').textContent.startsWith('201 words'), $('selection-count').textContent);
 
-// nouns only, positions within the filter
+// The range always counts positions among the ticked types.
+ok('range mode selector is gone',
+  window.document.querySelectorAll('input[name="rangeMode"]').length === 0);
+
 $('btn-pos-none').click();
 const nounBox = [...$('pos-filter').querySelectorAll('input')].find((i) => i.value === 'noun');
 nounBox.checked = true; fire(nounBox, 'change');
-window.document.querySelector('input[name="rangeMode"][value="filter"]').checked = true;
-fire(window.document.querySelector('input[name="rangeMode"][value="filter"]'), 'change');
 $('range-start').value = '1'; fire($('range-start'), 'input');
 $('range-end').value = '50'; fire($('range-end'), 'input');
 await settle();
-ok('nouns 1-50 in filter mode', $('selection-count').textContent.startsWith('50 words'), $('selection-count').textContent);
-ok('range hint explains filter mode', $('range-hint').textContent.includes('most common nouns'));
+ok('nouns 1-50 gives 50 nouns', $('selection-count').textContent.startsWith('50 words'), $('selection-count').textContent);
+ok('hint names the type', /nouns/i.test($('range-hint').textContent), $('range-hint').textContent);
+ok('hint states the pool size', /242/.test($('range-hint').textContent), $('range-hint').textContent);
+ok('hint states the positions', /1–50|1-50/.test($('range-hint').textContent), $('range-hint').textContent);
+
+// Widening the type filter keeps the width but changes what falls inside it.
+$('btn-pos-all').click();
+await settle();
+ok('width unchanged by filter', $('selection-count').textContent.startsWith('50 words'),
+  $('selection-count').textContent);
+ok('hint switches to the whole list', /500 words on the list/.test($('range-hint').textContent),
+  $('range-hint').textContent);
+
+// Two types ticked: not the whole list, and no single type to name.
+$('btn-pos-none').click();
+for (const v of ['noun', 'verb']) {
+  const box = [...$('pos-filter').querySelectorAll('input')].find((i) => i.value === v);
+  box.checked = true; fire(box, 'change');
+}
+await settle();
+ok('hint counts the mixed pool', /350 words you have ticked/.test($('range-hint').textContent),
+  $('range-hint').textContent);
+
+$('btn-pos-all').click();
+await settle();
+ok('all-types hint on the full deck', /500 words on the list/.test($('range-hint').textContent),
+  $('range-hint').textContent);
 
 // empty selection disables the start buttons
 $('btn-pos-none').click();
@@ -231,7 +257,8 @@ ok('browse back to setup', $('screen-setup').hidden === false);
 /* -------------------------------------------------- settings persistence */
 
 const settings = JSON.parse(window.localStorage.getItem('germanapp:settings:v1') || '{}');
-ok('settings persisted', settings.rangeMode === 'filter' || settings.rangeMode === 'all');
+ok('range start persisted', Number.isFinite(settings.start));
+ok('retired range mode not persisted', !('rangeMode' in settings), JSON.stringify(settings.rangeMode));
 ok('session length persisted', settings.sessionLength === 10, String(settings.sessionLength));
 ok('pos filter persisted', Array.isArray(settings.posFilter));
 
@@ -378,6 +405,19 @@ ok('food range selects all 130', $('selection-count').textContent.startsWith('13
 const foodTypes = [...$('pos-filter').querySelectorAll('.check')].map((c) => c.textContent);
 ok('food filter drops unused types', foodTypes.length < 9 && foodTypes.length >= 3, String(foodTypes.length));
 
+// This deck has only three of the ten types, so "nothing excluded" cannot be
+// detected by counting ticked types — it has to compare against the deck.
+ok('all-types hint on a partial-type deck',
+  /130 words on the list/.test($('range-hint').textContent), $('range-hint').textContent);
+
+const firstFoodBox = $('pos-filter').querySelector('input');
+firstFoodBox.checked = false; fire(firstFoodBox, 'change');
+await settle();
+ok('unticking one type switches the wording',
+  /you have ticked/.test($('range-hint').textContent), $('range-hint').textContent);
+firstFoodBox.checked = true; fire(firstFoodBox, 'change');
+await settle();
+
 // a session on the new deck runs, and writes to its own progress key
 $('opt-length').value = '10'; fire($('opt-length'), 'change');
 $('btn-typing').click();
@@ -416,12 +456,14 @@ ok('time deck loaded', $('deck-summary').textContent === '120 words loaded', $('
 
 /* -------------------------------------------------- streak, logo, audio -- */
 
-ok('logo rendered in header', window.document.querySelector('.app-header .logo') !== null);
-ok('logo has both strokes',
-  window.document.querySelectorAll('.logo path').length === 2);
-ok('logo paths identical',
-  window.document.querySelector('.logo-crust').getAttribute('d') ===
-  window.document.querySelector('.logo-dough').getAttribute('d'));
+const logo = window.document.querySelector('.app-header .logo');
+ok('logo rendered in header', logo !== null);
+ok('logo is the pretzel', logo.textContent.trim() === '🥨', logo.textContent);
+ok('logo is labelled for screen readers', logo.getAttribute('aria-label') === 'Pretzel');
+// The header mark and the streak chip must be the same glyph, or they read as
+// two different brands sitting one above the other.
+ok('logo matches the streak icon',
+  logo.textContent.trim() === window.document.querySelector('.streak-icon').textContent.trim());
 
 // A session ran earlier in this file, so today is already credited.
 const streakRaw = window.localStorage.getItem('germanapp:streak:v1');
@@ -450,7 +492,7 @@ $('answer-input').value = 'nope';
 $('btn-check').click();
 await settle();
 
-const exampleCard = $('card-prompt').textContent;
+const currentPrompt = $("card-prompt").textContent;
 ok('example speaker shown after answering', $('btn-speak-example').hidden === false);
 ok('example text rendered', $('example-text').textContent.length > 0);
 ok('speaker sits beside the German sentence',
@@ -461,10 +503,14 @@ $('btn-speak-example').click();
 await settle();
 ok('example speaker speaks', spoken.length === beforeExample + 1, String(spoken.length));
 
-// The whole point: it must read the sentence, not the headword.
+// The whole point: it must read the example sentence, not the headword.
+// Compared against the sentence actually on screen rather than against the
+// prompt's length -- cards are shuffled, and a short sentence under a long
+// English gloss made that a coin toss.
 const said = spoken[spoken.length - 1] || '';
-ok('speaks a full sentence', said.length > exampleCard.length && /\s/.test(said), said);
-ok('speaks the German example, not the English', !/^(the|a|an)\s/i.test(said), said);
+const shownSentence = $('example-text').querySelector('em').textContent.replace('🔊', '').trim();
+ok('speaks exactly the sentence on screen', said === shownSentence, `${said} | ${shownSentence}`);
+ok('speaks more than the headword', said !== currentPrompt, said);
 ok('sentence ends like a sentence', /[.!?]$/.test(said), said);
 
 $('btn-quit').click();

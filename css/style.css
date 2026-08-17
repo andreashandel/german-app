@@ -16,9 +16,6 @@
   --bad-bg: #fbe8e4;
   --warn: #8a6a13;
   --warn-bg: #fbf1d6;
-  /* Pretzel mark — same values as tools/make-icons.py */
-  --dough: #e7a93f;
-  --crust: #96581a;
   --radius: 14px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 14px rgba(0, 0, 0, 0.04);
 }
@@ -87,16 +84,12 @@ h2 {
   align-items: center;
   gap: 14px;
 }
+/* The system pretzel, same glyph as the streak chip, so the two match on
+   whatever device she is using. */
 .logo {
-  width: 54px;
-  height: 54px;
+  font-size: 2.6rem;
+  line-height: 1;
   flex: none;
-}
-.logo-crust {
-  stroke: var(--crust);
-}
-.logo-dough {
-  stroke: var(--dough);
 }
 
 .sub,

@@ -2,8 +2,8 @@
 //
 // Storage is keyed by deck so a custom vocabulary list does not overwrite the
 // built-in one. iOS Safari clears localStorage for sites unvisited for seven
-// days unless the app has been added to the home screen, which is why the
-// export button exists.
+// days unless the app has been added to the home screen — which is the reason
+// the README pushes "Add to Home Screen" so hard.
 
 const PROGRESS_KEY = (deckId) => `germanapp:progress:v1:${deckId}`;
 const SETTINGS_KEY = 'germanapp:settings:v1';
@@ -106,30 +106,6 @@ export function summarise(words, progress) {
   }
 
   return { total: words.length, unseen, learning, mastered };
-}
-
-export function exportProgress(deckId) {
-  return JSON.stringify(
-    { deck: deckId, exported: new Date().toISOString(), progress: loadProgress(deckId) },
-    null,
-    2
-  );
-}
-
-/** Merge an exported file back in, keeping whichever record was seen more. */
-export function importProgress(deckId, json) {
-  const parsed = JSON.parse(json);
-  const incoming = parsed.progress || parsed;
-  const current = loadProgress(deckId);
-
-  for (const [id, rec] of Object.entries(incoming)) {
-    if (!rec || typeof rec.seen !== 'number') continue;
-    const existing = current[id];
-    if (!existing || rec.seen > existing.seen) current[id] = rec;
-  }
-
-  saveProgress(deckId, current);
-  return Object.keys(incoming).length;
 }
 
 export function resetProgress(deckId) {

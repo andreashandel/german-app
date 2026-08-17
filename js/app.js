@@ -10,8 +10,6 @@ import {
   dueWords,
   hardWords,
   summarise,
-  exportProgress,
-  importProgress,
   resetProgress,
   loadSettings,
   saveSettings,
@@ -35,7 +33,6 @@ const state = {
     posFilter: [...POS_VALUES],
     start: 1,
     end: 100,
-    rangeMode: 'all',
     direction: 'de-en',
     allowTypos: true,
     requireArticle: true,
@@ -167,7 +164,6 @@ function currentSelection() {
     posFilter: state.settings.posFilter,
     start: Math.max(1, state.settings.start),
     end: Math.max(1, state.settings.end),
-    rangeMode: state.settings.rangeMode,
   });
 }
 
@@ -197,6 +193,30 @@ function syncLengthOutput(selectedCount) {
     count > 0 && value >= count ? `all ${count}` : String(value);
 }
 
+/**
+ * Says what the two sliders currently mean, in words and with real numbers.
+ * This replaced a pair of radio buttons explaining the two possible readings —
+ * describing the one that is actually happening beats making her pick.
+ */
+function describeRange() {
+  const pool = state.words.filter((w) => state.settings.posFilter.includes(w.pos));
+  const { start, end } = state.settings;
+
+  if (pool.length === 0) return 'Tick at least one word type.';
+
+  const chosen = state.settings.posFilter;
+  const noun = chosen.length === 1 ? POS_LABELS[chosen[0]].toLowerCase() : 'words';
+  // Whether anything is actually excluded, rather than whether every possible
+  // type is ticked — a deck need not contain all ten types.
+  const of =
+    pool.length === state.words.length
+      ? `the ${pool.length} words on the list`
+      : `the ${pool.length} ${noun} you have ticked`;
+
+  if (start > pool.length) return `Only ${pool.length} ${noun} to choose from — slide From back.`;
+  return `Positions ${start}–${Math.min(end, pool.length)} of ${of}, in order of how common they are.`;
+}
+
 function refreshSelection() {
   const selected = currentSelection();
   const countEl = $('selection-count');
@@ -210,10 +230,7 @@ function refreshSelection() {
     $(id).disabled = selected.length === 0;
   }
 
-  $('range-hint').textContent =
-    state.settings.rangeMode === 'all'
-      ? 'Counting positions on the whole frequency list, then keeping the types you ticked.'
-      : 'Counting positions among the ticked types only — so “Nouns, 1 to 100” means the 100 most common nouns.';
+  $('range-hint').textContent = describeRange();
 
   const stats = summarise(state.words, state.progress);
   const due = dueWords(state.words, state.progress).length;
@@ -241,7 +258,6 @@ function applySettingsToForm() {
   $('opt-audio').checked = state.settings.audio;
   $('opt-length').value = String(state.settings.sessionLength);
   syncRangeOutputs();
-  document.querySelector(`input[name="rangeMode"][value="${state.settings.rangeMode}"]`).checked = true;
   document.querySelector(`input[name="direction"][value="${state.settings.direction}"]`).checked = true;
 }
 
@@ -609,13 +625,6 @@ function wireSetup() {
   $('range-start').addEventListener('input', () => onRange('start'));
   $('range-end').addEventListener('input', () => onRange('end'));
 
-  document.querySelectorAll('input[name="rangeMode"]').forEach((el) =>
-    el.addEventListener('change', () => {
-      state.settings.rangeMode = el.value;
-      persistSettings();
-      refreshSelection();
-    })
-  );
 
   document.querySelectorAll('input[name="direction"]').forEach((el) =>
     el.addEventListener('change', () => {
@@ -668,31 +677,6 @@ function wireSetup() {
   $('btn-hard').addEventListener('click', () =>
     startSession('typing', hardWords(currentSelection(), state.progress))
   );
-
-  $('btn-export').addEventListener('click', () => {
-    const blob = new Blob([exportProgress(state.deckId)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `german-progress-${state.deckId.replace(/[:]/g, '-')}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  });
-
-  $('btn-import').addEventListener('click', () => $('import-input').click());
-  $('import-input').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const count = importProgress(state.deckId, await file.text());
-      state.progress = loadProgress(state.deckId);
-      refreshSelection();
-      $('deck-note').textContent = `Imported progress for ${count} words.`;
-    } catch (err) {
-      $('deck-note').textContent = `Could not import: ${err.message}`;
-    } finally {
-      e.target.value = '';
-    }
-  });
 
   $('btn-reset').addEventListener('click', () => {
     if (!confirm(`Erase all progress for “${state.deckName}”? This cannot be undone.`)) return;
@@ -834,6 +818,11 @@ async function init() {
   if (!Number.isFinite(state.settings.sessionLength) || state.settings.sessionLength < 5) {
     state.settings.sessionLength = 20;
   }
+
+  // The range used to be interpretable two ways, chosen by a radio pair. Only
+  // the "positions among the chosen types" reading survives, so any stored
+  // preference is dropped rather than left to rot in localStorage.
+  delete state.settings.rangeMode;
 
   state.streak = loadStreak();
   renderStreak();

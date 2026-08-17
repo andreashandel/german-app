@@ -45,10 +45,10 @@ for (const deck of manifest) {
   console.log('  pos:', Object.entries(counts).filter(([, n]) => n).map(([p, n]) => `${p} ${n}`).join(', '));
 
   // the range selector and both directions actually work on this deck
-  const all = selectWords(words, { posFilter: null, start: 1, end: words.length, rangeMode: 'all' });
+  const all = selectWords(words, { posFilter: null, start: 1, end: words.length });
   if (all.length !== words.length) flag(`full range gave ${all.length} of ${words.length}`);
 
-  const nouns = selectWords(words, { posFilter: ['noun'], start: 1, end: 10, rangeMode: 'filter' });
+  const nouns = selectWords(words, { posFilter: ['noun'], start: 1, end: 10 });
   console.log('  first nouns:', nouns.slice(0, 4).map(germanDisplay).join(', ') || '(none)');
 
   // grading works both ways on every single word, with the article required
