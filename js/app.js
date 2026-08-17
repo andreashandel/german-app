@@ -264,21 +264,60 @@ function applySettingsToForm() {
 /* -------------------------------------------------------------- speaking */
 
 let germanVoice = null;
-
-function pickGermanVoice() {
-  if (!('speechSynthesis' in window)) return;
-  const voices = speechSynthesis.getVoices();
-  germanVoice = voices.find((v) => v.lang && v.lang.toLowerCase().startsWith('de')) || null;
-}
+// Until the browser has handed over a voice list at least once there is no way
+// to tell a missing German voice from one that has simply not loaded yet, so
+// nothing is switched off on the strength of an empty list.
+let voicesEnumerated = false;
 
 function speechAvailable() {
   return 'speechSynthesis' in window;
 }
 
+function pickGermanVoice() {
+  if (!speechAvailable()) return;
+  const voices = speechSynthesis.getVoices();
+  if (voices.length === 0) return;
+  voicesEnumerated = true;
+  germanVoice = voices.find((v) => v.lang && v.lang.toLowerCase().startsWith('de')) || null;
+  applySpeechAvailability();
+}
+
+/**
+ * Whether the browser can read German *as German*.
+ *
+ * A browser only offers the voices it has: Firefox on Windows exposes just the
+ * ones Windows itself has installed, and a machine with no German voice pack
+ * has none. The utterance then falls back to the default English voice, which
+ * reads "gern" as an English word — confident mispronunciation, which is worse
+ * than silence for someone learning what the words sound like.
+ */
+function germanSpeechAvailable() {
+  return speechAvailable() && (germanVoice !== null || !voicesEnumerated);
+}
+
+/** Reflect the presence or absence of a German voice in the controls. */
+function applySpeechAvailability() {
+  const available = germanSpeechAvailable();
+
+  $('opt-audio').disabled = !available;
+  $('audio-note').hidden = available;
+  $('audio-note').textContent = speechAvailable()
+    ? 'Your browser has no German voice, so this would read the words with an English accent. Add a German voice in your device’s speech settings to switch it on.'
+    : 'This browser cannot read words aloud.';
+
+  // Losing the voice mid-session hides the speakers straight away; gaining one
+  // is picked up by the next card, which is soon enough for a bonus feature.
+  if (!available) {
+    for (const id of ['btn-speak-prompt', 'btn-speak-answer', 'btn-speak-example']) {
+      $(id).hidden = true;
+    }
+  }
+}
+
 /** `force` is the speaker button: it plays even when auto-speak is off. */
 function speakGerman(text, { force = false } = {}) {
   if (!force && !state.settings.audio) return;
-  if (!speechAvailable() || !text) return;
+  if (!germanSpeechAvailable() || !text) return;
   try {
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
@@ -369,7 +408,7 @@ function renderCard() {
 
   // The speaker follows the German: it is the prompt one way round and the
   // answer the other, so it only appears here when German is being shown.
-  $('btn-speak-prompt').hidden = !(speechAvailable() && card.dir === 'de-en');
+  $('btn-speak-prompt').hidden = !(germanSpeechAvailable() && card.dir === 'de-en');
   $('btn-speak-answer').hidden = true;
   // Belongs to the revealed answer, so it starts hidden on every new card.
   $('btn-speak-example').hidden = true;
@@ -426,13 +465,13 @@ function showFeedback({ correct, typo, missingArticle, wrongArticle, hinted }) {
   if (hasExample) {
     const de = document.createElement('em');
     de.textContent = card.word.exampleDe;
-    if (speechAvailable()) de.append(' ', speakExample);
+    if (germanSpeechAvailable()) de.append(' ', speakExample);
     exampleText.append(de);
     if (card.word.exampleEn) exampleText.append(document.createTextNode(card.word.exampleEn));
   }
-  speakExample.hidden = !(hasExample && speechAvailable());
+  speakExample.hidden = !(hasExample && germanSpeechAvailable());
 
-  $('btn-speak-answer').hidden = !(speechAvailable() && card.dir === 'en-de');
+  $('btn-speak-answer').hidden = !(germanSpeechAvailable() && card.dir === 'en-de');
   $('feedback').hidden = false;
   if (card.dir === 'en-de') speakGerman(card.word.german);
 }
@@ -833,10 +872,13 @@ async function init() {
   wireSummary();
   wireBrowse();
 
-  if ('speechSynthesis' in window) {
+  if (speechAvailable()) {
     pickGermanVoice();
+    // Voices commonly arrive after first paint, and a browser that has none in
+    // German is only knowable once they have.
     speechSynthesis.addEventListener?.('voiceschanged', pickGermanVoice);
   }
+  applySpeechAvailability();
 
   const builtIns = await loadBuiltInDecks();
   populateDeckSelect(builtIns);

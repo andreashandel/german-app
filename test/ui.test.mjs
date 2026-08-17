@@ -43,11 +43,16 @@ window.URL.revokeObjectURL = () => {};
 // serviceWorker support, which correctly reports false here.
 // Speech is absent from jsdom; stub it so the speaker buttons are exercisable.
 const spoken = [];
+// Swappable so the no-German-voice case can be exercised further down.
+let stubVoices = [{ lang: 'de-DE', name: 'Test German' }];
+const voiceListeners = [];
 window.speechSynthesis = {
-  getVoices: () => [{ lang: 'de-DE', name: 'Test German' }],
+  getVoices: () => stubVoices,
   speak: (u) => spoken.push(u.text),
   cancel: () => {},
-  addEventListener: () => {},
+  addEventListener: (type, fn) => {
+    if (type === 'voiceschanged') voiceListeners.push(fn);
+  },
 };
 window.SpeechSynthesisUtterance = class {
   constructor(text) { this.text = text; }
@@ -655,6 +660,43 @@ ok('smaller deck still selects words', /^\d+ words/.test($('selection-count').te
 ok('outputs match the sliders',
   $('range-start-out').textContent === $('range-start').value &&
   $('range-end-out').textContent === $('range-end').value);
+
+/* -------------------------------------- a browser with no German voice --- */
+// Firefox on Windows offers only the voices Windows itself has installed, and a
+// machine with no German pack has none. Reading German aloud with an English
+// voice teaches the wrong sounds, so the feature switches itself off rather
+// than mispronounce with confidence.
+
+ok('audio offered while a German voice exists', $('opt-audio').disabled === false);
+ok('audio note hidden while a German voice exists', $('audio-note').hidden === true);
+
+const deEn = window.document.querySelector('input[name="direction"][value="de-en"]');
+deEn.checked = true;
+fire(deEn, 'change');
+$('btn-typing').click();
+await settle();
+ok('prompt speaker live while a German voice exists', $('btn-speak-prompt').hidden === false);
+
+stubVoices = [{ lang: 'en-US', name: 'Microsoft David' }];
+for (const fn of voiceListeners) fn();
+await settle();
+
+ok('prompt speaker hidden once the German voice is gone', $('btn-speak-prompt').hidden === true);
+ok('example speaker hidden once the German voice is gone', $('btn-speak-example').hidden === true);
+
+const beforeSilence = spoken.length;
+$('btn-speak-prompt').click();
+$('btn-speak-example').click();
+await settle();
+ok('nothing is spoken without a German voice', spoken.length === beforeSilence,
+  String(spoken.length - beforeSilence));
+
+$('btn-quit').click();
+await settle();
+ok('audio switched off without a German voice', $('opt-audio').disabled === true);
+ok('audio note explains the silence', $('audio-note').hidden === false);
+ok('audio note names the missing voice', /German voice/.test($('audio-note').textContent),
+  $('audio-note').textContent);
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
