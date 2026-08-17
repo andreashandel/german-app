@@ -56,15 +56,19 @@
         <div class="card">
           <h2>Which words</h2>
 
-          <div class="range-row">
-            <label class="field">
+          <div class="slider-field">
+            <label class="slider-head" for="range-start">
               <span class="field-label">From</span>
-              <input type="number" id="range-start" min="1" value="1" inputmode="numeric" />
+              <output class="slider-value" id="range-start-out">1</output>
             </label>
-            <label class="field">
+            <input type="range" id="range-start" min="1" max="500" value="1" />
+          </div>
+          <div class="slider-field">
+            <label class="slider-head" for="range-end">
               <span class="field-label">To</span>
-              <input type="number" id="range-end" min="1" value="100" inputmode="numeric" />
+              <output class="slider-value" id="range-end-out">100</output>
             </label>
+            <input type="range" id="range-end" min="1" max="500" value="100" />
           </div>
 
           <fieldset class="seg">
@@ -129,16 +133,13 @@
               <input type="checkbox" id="opt-audio" />
               <span>Read the German word aloud</span>
             </label>
-            <label class="field">
-              <span class="field-label">Words per session</span>
-              <select id="opt-length">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="30">30</option>
-                <option value="50">50</option>
-                <option value="0">All selected</option>
-              </select>
-            </label>
+            <div class="slider-field">
+              <label class="slider-head" for="opt-length">
+                <span class="field-label">Words per session</span>
+                <output class="slider-value" id="opt-length-out">20</output>
+              </label>
+              <input type="range" id="opt-length" min="5" max="100" step="5" value="20" />
+            </div>
           </details>
         </div>
 
@@ -176,13 +177,18 @@
       <!-- =========================== SESSION =========================== -->
       <section id="screen-session" class="screen" hidden>
         <header class="session-bar">
-          <button type="button" class="icon-btn" id="btn-quit" aria-label="Back to setup">‹</button>
+          <button type="button" class="menu-btn" id="btn-quit" aria-label="End the session and go back to the menu">
+            <span aria-hidden="true">‹</span> Menu
+          </button>
           <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
           <span class="counter" id="session-counter">0 / 0</span>
         </header>
 
         <div class="card quiz">
-          <p class="dir-label" id="card-direction">German → English</p>
+          <p class="dir-label">
+            <span id="card-direction">German → English</span>
+            <span class="pos-chip" id="card-pos" hidden></span>
+          </p>
           <p class="prompt">
             <span id="card-prompt"></span>
             <button

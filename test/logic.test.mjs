@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { parseCsv, toWords, germanDisplay } from '../js/csv.js';
 import { selectWords, countByPos } from '../js/deck.js';
 import {
-  checkAnswer, normalise, acceptedAnswers, makeCard,
+  checkAnswer, normalise, acceptedAnswers, makeCard, expectedAnswer,
   hintMask, hintLength, hintFor, hintMax,
 } from '../js/quiz.js';
 import {
@@ -184,6 +184,51 @@ ok('good still advances after hint', prog.x.box === afterGood.box + 1);
 const prog2 = {};
 recordResult(prog2, 'y', 'hint');
 ok('hint from scratch stays box 1', prog2.y.box === 1);
+
+// --- alternative German forms ---------------------------------------------
+const nie = {
+  german: 'nie', article: '', plural: '', english: ['never'],
+  also: ['niemals'], pos: 'adverb', id: 'nie:adverb',
+};
+const opts = { requireArticle: true, allowTypos: true };
+
+ok('headword accepted', checkAnswer('nie', nie, 'en-de', opts).correct);
+ok('alternative accepted', checkAnswer('niemals', nie, 'en-de', opts).correct);
+ok('alternative is case-insensitive', checkAnswer('Niemals', nie, 'en-de', opts).correct);
+ok('unrelated word still wrong', checkAnswer('immer', nie, 'en-de', opts).correct === false);
+ok('both forms shown with the answer', expectedAnswer(nie, 'en-de') === 'nie / niemals');
+ok('alternatives do not leak into the English side',
+  expectedAnswer(nie, 'de-en') === 'never');
+ok('alternative in accepted set', acceptedAnswers(nie, 'en-de', opts).has('niemals'));
+
+// with an article, the alternative still has to carry the right gender
+const sat = {
+  german: 'Samstag', article: 'der', plural: 'Samstage', english: ['Saturday'],
+  also: ['Sonnabend'], pos: 'noun', id: 'samstag:noun',
+};
+ok('noun headword accepted', checkAnswer('der Samstag', sat, 'en-de', opts).correct);
+ok('noun alternative accepted', checkAnswer('der Sonnabend', sat, 'en-de', opts).correct);
+ok('alternative without article rejected',
+  checkAnswer('Sonnabend', sat, 'en-de', opts).missingArticle === true);
+ok('alternative with wrong article rejected',
+  checkAnswer('die Sonnabend', sat, 'en-de', opts).wrongArticle === true);
+ok('article shown on both forms',
+  expectedAnswer(sat, 'en-de') === 'der Samstag / der Sonnabend');
+
+// a word with no alternatives must behave exactly as before
+const plain = { german: 'immer', article: '', plural: '', english: ['always'], pos: 'adverb' };
+ok('missing also field is harmless', checkAnswer('immer', plain, 'en-de', opts).correct);
+ok('no separator when there is nothing to add', expectedAnswer(plain, 'en-de') === 'immer');
+
+// the deck itself must carry the alternative through the parser
+const timeDeck = toWords(parseCsv(fs.readFileSync(new URL('../data/de-time.csv', import.meta.url), 'utf8')));
+const nieRow = timeDeck.find((w) => w.german === 'nie');
+ok('nie parsed from the deck', Boolean(nieRow));
+ok('nie carries niemals', nieRow.also.includes('niemals'), JSON.stringify(nieRow.also));
+ok('niemals accepted from real data', checkAnswer('niemals', nieRow, 'en-de', opts).correct);
+ok('nie accepted from real data', checkAnswer('nie', nieRow, 'en-de', opts).correct);
+ok('niemals is not a separate card',
+  timeDeck.filter((w) => w.german === 'niemals').length === 0);
 
 // --- streak ---------------------------------------------------------------
 // Local dates on purpose: the streak follows the day she is living in.

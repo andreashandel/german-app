@@ -1,2 +1,6 @@
 - Turn the 'from' and 'to' fields that allow one to pick words into sliders
 - instead of fixing at 20, allow user to choose how many practice exercises they want to get
+- when translating, indiciate what type of word that is. For instance if the english word 'date' is shown, that could be 'to date' (verb) or 'date' (noun) 
+- On the translate exercise, when I enter a word and press enter instead of the check button, it just silently advances. hitting enter should have the same effect as pressing the 'check' button.
+- 'never' should translate to both 'nie' and 'niemals' in german.
+- the 'back' button on the exercises looks a bit like it goes back to the prior word, not back to the menu. Can you change that so it's clearer that this button means 'back to menu'. 

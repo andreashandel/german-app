@@ -1,121 +1,121 @@
-rank,german,article,plural,english,pos,example_de,example_en
-1,Zeit,die,Zeiten,"time",noun,"Ich habe heute keine Zeit.","I do not have time today."
-2,Uhr,die,Uhren,"clock; watch; o'clock",noun,"Die Uhr geht falsch.","The clock is wrong."
-3,Uhrzeit,die,Uhrzeiten,"time of day",noun,"Wie ist die genaue Uhrzeit?","What is the exact time?"
-4,Sekunde,die,Sekunden,"second",noun,"Warte eine Sekunde!","Wait a second!"
-5,Minute,die,Minuten,"minute",noun,"Der Bus kommt in fünf Minuten.","The bus comes in five minutes."
-6,Stunde,die,Stunden,"hour",noun,"Wir warten seit einer Stunde.","We have been waiting for an hour."
-7,Tag,der,Tage,"day",noun,"Der Tag war lang und heiß.","The day was long and hot."
-8,Woche,die,Wochen,"week",noun,"Nächste Woche fahre ich weg.","Next week I am going away."
-9,Monat,der,Monate,"month",noun,"Der Monat ist fast vorbei.","The month is almost over."
-10,Jahr,das,Jahre,"year",noun,"Nächstes Jahr fahren wir nach Spanien.","Next year we are going to Spain."
-11,Jahrzehnt,das,Jahrzehnte,"decade",noun,"Das war vor einem Jahrzehnt.","That was a decade ago."
-12,Jahrhundert,das,Jahrhunderte,"century",noun,"Die Kirche ist aus dem 12. Jahrhundert.","The church is from the 12th century."
-13,Moment,der,Momente,"moment",noun,"Einen Moment, bitte!","One moment, please!"
-14,Augenblick,der,Augenblicke,"instant; moment",noun,"Im Augenblick geht es nicht.","At the moment it is not possible."
-15,Datum,das,Daten,"date",noun,"Welches Datum haben wir heute?","What is the date today?"
-16,Kalender,der,Kalender,"calendar",noun,"Ich schreibe es in den Kalender.","I will write it in the calendar."
-17,Termin,der,Termine,"appointment",noun,"Ich habe einen Termin beim Arzt.","I have a doctor's appointment."
-18,Montag,der,Montage,"Monday",noun,"Am Montag beginnt die Schule.","School starts on Monday."
-19,Dienstag,der,Dienstage,"Tuesday",noun,"Dienstag habe ich einen Kurs.","On Tuesday I have a class."
-20,Mittwoch,der,Mittwoche,"Wednesday",noun,"Wir treffen uns am Mittwoch.","We are meeting on Wednesday."
-21,Donnerstag,der,Donnerstage,"Thursday",noun,"Der Markt ist am Donnerstag.","The market is on Thursday."
-22,Freitag,der,Freitage,"Friday",noun,"Am Freitag habe ich frei.","I am off on Friday."
-23,Samstag,der,Samstage,"Saturday",noun,"Am Samstag schlafe ich lange.","On Saturday I sleep in."
-24,Sonntag,der,Sonntage,"Sunday",noun,"Am Sonntag besuchen wir Oma.","On Sunday we visit Grandma."
-25,Wochenende,das,Wochenenden,"weekend",noun,"Schönes Wochenende!","Have a nice weekend!"
-26,Wochentag,der,Wochentage,"weekday",noun,"An Wochentagen stehe ich früh auf.","On weekdays I get up early."
-27,Feiertag,der,Feiertage,"public holiday",noun,"Morgen ist ein Feiertag.","Tomorrow is a public holiday."
-28,Januar,der,,"January",noun,"Im Januar ist es sehr kalt.","It is very cold in January."
-29,Februar,der,,"February",noun,"Der Februar ist kurz.","February is short."
-30,März,der,,"March",noun,"Im März wird es wärmer.","It gets warmer in March."
-31,April,der,,"April",noun,"Im April regnet es oft.","It often rains in April."
-32,Mai,der,,"May",noun,"Der Mai ist mein Lieblingsmonat.","May is my favorite month."
-33,Juni,der,,"June",noun,"Im Juni fahren wir ans Meer.","In June we go to the sea."
-34,Juli,der,,"July",noun,"Wir machen im Juli Urlaub.","We take a vacation in July."
-35,August,der,,"August",noun,"Im August ist es sehr heiß.","It is very hot in August."
-36,September,der,,"September",noun,"Die Schule beginnt im September.","School starts in September."
-37,Oktober,der,,"October",noun,"Im Oktober werden die Blätter bunt.","In October the leaves turn colorful."
-38,November,der,,"November",noun,"Der November ist grau.","November is gray."
-39,Dezember,der,,"December",noun,"Im Dezember schneit es oft.","It often snows in December."
-40,Jahreszeit,die,Jahreszeiten,"season",noun,"Welche Jahreszeit magst du?","Which season do you like?"
-41,Frühling,der,Frühlinge,"spring",noun,"Im Frühling blühen die Blumen.","In spring the flowers bloom."
-42,Sommer,der,Sommer,"summer",noun,"Der Sommer war sehr heiß.","The summer was very hot."
-43,Herbst,der,Herbste,"autumn; fall",noun,"Im Herbst wird es früh dunkel.","In autumn it gets dark early."
-44,Winter,der,Winter,"winter",noun,"Im Winter fahren wir Ski.","In winter we go skiing."
-45,Morgen,der,Morgen,"morning",noun,"Am Morgen trinke ich Tee.","In the morning I drink tea."
-46,Vormittag,der,Vormittage,"late morning",noun,"Am Vormittag habe ich zwei Termine.","I have two appointments this morning."
-47,Mittag,der,Mittage,"noon; midday",noun,"Wir essen um Mittag.","We eat at noon."
-48,Nachmittag,der,Nachmittage,"afternoon",noun,"Der Nachmittag war ruhig.","The afternoon was quiet."
-49,Abend,der,Abende,"evening",noun,"Der Abend war sehr schön.","The evening was lovely."
-50,Nacht,die,Nächte,"night",noun,"Die Nacht war kalt.","The night was cold."
-51,Mitternacht,die,,"midnight",noun,"Wir kamen erst um Mitternacht an.","We only arrived at midnight."
-52,heute,,,"today",adverb,"Heute habe ich frei.","I have the day off today."
-53,morgen,,,"tomorrow",adverb,"Morgen habe ich einen Termin.","Tomorrow I have an appointment."
-54,gestern,,,"yesterday",adverb,"Gestern war ich im Kino.","Yesterday I was at the cinema."
-55,übermorgen,,,"the day after tomorrow",adverb,"Übermorgen kommt Besuch.","We have visitors the day after tomorrow."
-56,vorgestern,,,"the day before yesterday",adverb,"Vorgestern hat es geregnet.","It rained the day before yesterday."
-57,morgens,,,"in the mornings",adverb,"Morgens trinke ich Kaffee.","In the mornings I drink coffee."
-58,mittags,,,"at midday",adverb,"Mittags mache ich eine Pause.","At midday I take a break."
-59,abends,,,"in the evenings",adverb,"Abends lese ich gern.","In the evenings I like to read."
-60,nachts,,,"at night",adverb,"Nachts ist es hier sehr still.","At night it is very quiet here."
-61,jetzt,,,"now",adverb,"Jetzt verstehe ich das Problem.","Now I understand the problem."
-62,gerade,,,"just now; right now",adverb,"Sie telefoniert gerade.","She is on the phone right now."
-63,gleich,,,"right away; in a moment",adverb,"Ich komme gleich.","I will be right there."
-64,sofort,,,"immediately",adverb,"Komm bitte sofort her.","Please come here immediately."
-65,bald,,,"soon",adverb,"Wir sehen uns bald.","We will see each other soon."
-66,später,,,"later",adverb,"Das machen wir später.","We will do that later."
-67,früher,,,"earlier; in the past",adverb,"Früher war alles anders.","Things were different in the past."
-68,damals,,,"back then",adverb,"Damals war ich noch ein Kind.","Back then I was still a child."
-69,vorher,,,"beforehand",adverb,"Ruf mich vorher an.","Call me beforehand."
-70,nachher,,,"afterwards",adverb,"Nachher gehen wir spazieren.","Afterwards we will go for a walk."
-71,zuerst,,,"first; at first",adverb,"Zuerst essen wir.","First we eat."
-72,danach,,,"after that",adverb,"Danach trinken wir Kaffee.","After that we have coffee."
-73,zuletzt,,,"last; finally",adverb,"Zuletzt kam die Rechnung.","Last came the bill."
-74,inzwischen,,,"meanwhile; by now",adverb,"Inzwischen ist es dunkel.","By now it is dark."
-75,gleichzeitig,,,"at the same time",adverb,"Beide sprachen gleichzeitig.","Both spoke at the same time."
-76,endlich,,,"finally; at last",adverb,"Endlich bist du da!","You are finally here!"
-77,schon,,,"already",adverb,"Bist du schon fertig?","Are you finished already?"
-78,noch,,,"still; yet",adverb,"Er schläft noch.","He is still asleep."
-79,bereits,,,"already",adverb,"Der Zug ist bereits weg.","The train has already left."
-80,immer,,,"always",adverb,"Er kommt immer zu spät.","He is always late."
-81,nie,,,"never",adverb,"Ich war noch nie in Berlin.","I have never been to Berlin."
-82,oft,,,"often",adverb,"Wir gehen oft ins Kino.","We often go to the cinema."
-83,manchmal,,,"sometimes",adverb,"Manchmal koche ich selbst.","Sometimes I cook myself."
-84,selten,,,"rarely; seldom",adverb,"Er ruft nur selten an.","He rarely calls."
-85,häufig,,,"frequently",adverb,"Das passiert häufig.","That happens frequently."
-86,täglich,,,"daily",adverb,"Sie geht täglich spazieren.","She goes for a walk daily."
-87,wöchentlich,,,"weekly",adverb,"Der Kurs findet wöchentlich statt.","The course takes place weekly."
-88,monatlich,,,"monthly",adverb,"Die Miete zahlt man monatlich.","The rent is paid monthly."
-89,jährlich,,,"yearly; annually",adverb,"Das Fest findet jährlich statt.","The festival takes place annually."
-90,montags,,,"on Mondays",adverb,"Montags ist das Museum zu.","The museum is closed on Mondays."
-91,früh,,,"early",adjective,"Ich stehe früh auf.","I get up early."
-92,spät,,,"late",adjective,"Es ist schon spät.","It is already late."
-93,pünktlich,,,"punctual; on time",adjective,"Der Zug war pünktlich.","The train was on time."
-94,rechtzeitig,,,"in time",adjective,"Wir kamen rechtzeitig an.","We arrived in time."
-95,lange,,,"for a long time",adverb,"Wir haben lange gewartet.","We waited for a long time."
-96,kurz,,,"short; briefly",adjective,"Das Treffen war kurz.","The meeting was short."
-97,dauern,,,"to last; to take (time)",verb,"Wie lange dauert der Film?","How long does the film last?"
-98,beginnen,,,"to begin",verb,"Der Film beginnt um acht.","The film begins at eight."
-99,anfangen,,,"to start",verb,"Wann fangen wir an?","When do we start?"
-100,aufhören,,,"to stop",verb,"Der Regen hört nicht auf.","The rain will not stop."
-101,enden,,,"to end",verb,"Der Kurs endet im Juli.","The course ends in July."
-102,warten,,,"to wait",verb,"Wir warten auf den Bus.","We are waiting for the bus."
-103,verbringen,,,"to spend (time)",verb,"Wir verbringen den Sommer am See.","We spend the summer at the lake."
-104,sich beeilen,,,"to hurry",verb,"Beeil dich, wir sind spät dran!","Hurry up, we are late!"
-105,Verspätung,die,Verspätungen,"delay",noun,"Der Zug hat Verspätung.","The train is delayed."
-106,Pause,die,Pausen,"break; pause",noun,"Wir machen eine kurze Pause.","We are taking a short break."
-107,Anfang,der,Anfänge,"beginning",noun,"Am Anfang war es schwer.","At the beginning it was hard."
-108,Ende,das,Enden,"end",noun,"Am Ende waren alle zufrieden.","In the end everyone was happy."
-109,Dauer,die,,"duration",noun,"Die Dauer des Fluges ist zwei Stunden.","The duration of the flight is two hours."
-110,Zukunft,die,,"future",noun,"Was bringt die Zukunft?","What will the future bring?"
-111,Vergangenheit,die,,"past",noun,"Das gehört der Vergangenheit an.","That belongs to the past."
-112,Gegenwart,die,,"present",noun,"Wir leben in der Gegenwart.","We live in the present."
-113,Alter,das,,"age",noun,"In welchem Alter warst du dort?","At what age were you there?"
-114,Geburtstag,der,Geburtstage,"birthday",noun,"Heute ist mein Geburtstag.","Today is my birthday."
-115,seit,,,"since; for",preposition,"Ich wohne seit drei Jahren hier.","I have lived here for three years."
-116,bis,,,"until",preposition,"Ich warte bis morgen.","I will wait until tomorrow."
-117,während,,,"during",preposition,"Während des Essens sprachen wir wenig.","During the meal we spoke little."
-118,ab,,,"from (a time on)",preposition,"Ab Montag bin ich im Urlaub.","From Monday I am on vacation."
-119,vor,,,"before; ago",preposition,"Vor einer Woche war ich krank.","A week ago I was sick."
-120,nach,,,"after",preposition,"Nach dem Essen gehen wir spazieren.","After the meal we go for a walk."
+rank,german,article,plural,english,pos,example_de,example_en,also
+1,Zeit,die,Zeiten,time,noun,Ich habe heute keine Zeit.,I do not have time today.,
+2,Uhr,die,Uhren,clock; watch; o'clock,noun,Die Uhr geht falsch.,The clock is wrong.,
+3,Uhrzeit,die,Uhrzeiten,time of day,noun,Wie ist die genaue Uhrzeit?,What is the exact time?,
+4,Sekunde,die,Sekunden,second,noun,Warte eine Sekunde!,Wait a second!,
+5,Minute,die,Minuten,minute,noun,Der Bus kommt in fünf Minuten.,The bus comes in five minutes.,
+6,Stunde,die,Stunden,hour,noun,Wir warten seit einer Stunde.,We have been waiting for an hour.,
+7,Tag,der,Tage,day,noun,Der Tag war lang und heiß.,The day was long and hot.,
+8,Woche,die,Wochen,week,noun,Nächste Woche fahre ich weg.,Next week I am going away.,
+9,Monat,der,Monate,month,noun,Der Monat ist fast vorbei.,The month is almost over.,
+10,Jahr,das,Jahre,year,noun,Nächstes Jahr fahren wir nach Spanien.,Next year we are going to Spain.,
+11,Jahrzehnt,das,Jahrzehnte,decade,noun,Das war vor einem Jahrzehnt.,That was a decade ago.,
+12,Jahrhundert,das,Jahrhunderte,century,noun,Die Kirche ist aus dem 12. Jahrhundert.,The church is from the 12th century.,
+13,Moment,der,Momente,moment,noun,"Einen Moment, bitte!","One moment, please!",
+14,Augenblick,der,Augenblicke,instant; moment,noun,Im Augenblick geht es nicht.,At the moment it is not possible.,
+15,Datum,das,Daten,date,noun,Welches Datum haben wir heute?,What is the date today?,
+16,Kalender,der,Kalender,calendar,noun,Ich schreibe es in den Kalender.,I will write it in the calendar.,
+17,Termin,der,Termine,appointment,noun,Ich habe einen Termin beim Arzt.,I have a doctor's appointment.,
+18,Montag,der,Montage,Monday,noun,Am Montag beginnt die Schule.,School starts on Monday.,
+19,Dienstag,der,Dienstage,Tuesday,noun,Dienstag habe ich einen Kurs.,On Tuesday I have a class.,
+20,Mittwoch,der,Mittwoche,Wednesday,noun,Wir treffen uns am Mittwoch.,We are meeting on Wednesday.,
+21,Donnerstag,der,Donnerstage,Thursday,noun,Der Markt ist am Donnerstag.,The market is on Thursday.,
+22,Freitag,der,Freitage,Friday,noun,Am Freitag habe ich frei.,I am off on Friday.,
+23,Samstag,der,Samstage,Saturday,noun,Am Samstag schlafe ich lange.,On Saturday I sleep in.,Sonnabend
+24,Sonntag,der,Sonntage,Sunday,noun,Am Sonntag besuchen wir Oma.,On Sunday we visit Grandma.,
+25,Wochenende,das,Wochenenden,weekend,noun,Schönes Wochenende!,Have a nice weekend!,
+26,Wochentag,der,Wochentage,weekday,noun,An Wochentagen stehe ich früh auf.,On weekdays I get up early.,
+27,Feiertag,der,Feiertage,public holiday,noun,Morgen ist ein Feiertag.,Tomorrow is a public holiday.,
+28,Januar,der,,January,noun,Im Januar ist es sehr kalt.,It is very cold in January.,
+29,Februar,der,,February,noun,Der Februar ist kurz.,February is short.,
+30,März,der,,March,noun,Im März wird es wärmer.,It gets warmer in March.,
+31,April,der,,April,noun,Im April regnet es oft.,It often rains in April.,
+32,Mai,der,,May,noun,Der Mai ist mein Lieblingsmonat.,May is my favorite month.,
+33,Juni,der,,June,noun,Im Juni fahren wir ans Meer.,In June we go to the sea.,
+34,Juli,der,,July,noun,Wir machen im Juli Urlaub.,We take a vacation in July.,
+35,August,der,,August,noun,Im August ist es sehr heiß.,It is very hot in August.,
+36,September,der,,September,noun,Die Schule beginnt im September.,School starts in September.,
+37,Oktober,der,,October,noun,Im Oktober werden die Blätter bunt.,In October the leaves turn colorful.,
+38,November,der,,November,noun,Der November ist grau.,November is gray.,
+39,Dezember,der,,December,noun,Im Dezember schneit es oft.,It often snows in December.,
+40,Jahreszeit,die,Jahreszeiten,season,noun,Welche Jahreszeit magst du?,Which season do you like?,
+41,Frühling,der,Frühlinge,spring,noun,Im Frühling blühen die Blumen.,In spring the flowers bloom.,
+42,Sommer,der,Sommer,summer,noun,Der Sommer war sehr heiß.,The summer was very hot.,
+43,Herbst,der,Herbste,autumn; fall,noun,Im Herbst wird es früh dunkel.,In autumn it gets dark early.,
+44,Winter,der,Winter,winter,noun,Im Winter fahren wir Ski.,In winter we go skiing.,
+45,Morgen,der,Morgen,morning,noun,Am Morgen trinke ich Tee.,In the morning I drink tea.,
+46,Vormittag,der,Vormittage,late morning,noun,Am Vormittag habe ich zwei Termine.,I have two appointments this morning.,
+47,Mittag,der,Mittage,noon; midday,noun,Wir essen um Mittag.,We eat at noon.,
+48,Nachmittag,der,Nachmittage,afternoon,noun,Der Nachmittag war ruhig.,The afternoon was quiet.,
+49,Abend,der,Abende,evening,noun,Der Abend war sehr schön.,The evening was lovely.,
+50,Nacht,die,Nächte,night,noun,Die Nacht war kalt.,The night was cold.,
+51,Mitternacht,die,,midnight,noun,Wir kamen erst um Mitternacht an.,We only arrived at midnight.,
+52,heute,,,today,adverb,Heute habe ich frei.,I have the day off today.,
+53,morgen,,,tomorrow,adverb,Morgen habe ich einen Termin.,Tomorrow I have an appointment.,
+54,gestern,,,yesterday,adverb,Gestern war ich im Kino.,Yesterday I was at the cinema.,
+55,übermorgen,,,the day after tomorrow,adverb,Übermorgen kommt Besuch.,We have visitors the day after tomorrow.,
+56,vorgestern,,,the day before yesterday,adverb,Vorgestern hat es geregnet.,It rained the day before yesterday.,
+57,morgens,,,in the mornings,adverb,Morgens trinke ich Kaffee.,In the mornings I drink coffee.,
+58,mittags,,,at midday,adverb,Mittags mache ich eine Pause.,At midday I take a break.,
+59,abends,,,in the evenings,adverb,Abends lese ich gern.,In the evenings I like to read.,
+60,nachts,,,at night,adverb,Nachts ist es hier sehr still.,At night it is very quiet here.,
+61,jetzt,,,now,adverb,Jetzt verstehe ich das Problem.,Now I understand the problem.,
+62,gerade,,,just now; right now,adverb,Sie telefoniert gerade.,She is on the phone right now.,
+63,gleich,,,right away; in a moment,adverb,Ich komme gleich.,I will be right there.,
+64,sofort,,,immediately,adverb,Komm bitte sofort her.,Please come here immediately.,
+65,bald,,,soon,adverb,Wir sehen uns bald.,We will see each other soon.,
+66,später,,,later,adverb,Das machen wir später.,We will do that later.,
+67,früher,,,earlier; in the past,adverb,Früher war alles anders.,Things were different in the past.,
+68,damals,,,back then,adverb,Damals war ich noch ein Kind.,Back then I was still a child.,
+69,vorher,,,beforehand,adverb,Ruf mich vorher an.,Call me beforehand.,
+70,nachher,,,afterwards,adverb,Nachher gehen wir spazieren.,Afterwards we will go for a walk.,
+71,zuerst,,,first; at first,adverb,Zuerst essen wir.,First we eat.,
+72,danach,,,after that,adverb,Danach trinken wir Kaffee.,After that we have coffee.,
+73,zuletzt,,,last; finally,adverb,Zuletzt kam die Rechnung.,Last came the bill.,
+74,inzwischen,,,meanwhile; by now,adverb,Inzwischen ist es dunkel.,By now it is dark.,
+75,gleichzeitig,,,at the same time,adverb,Beide sprachen gleichzeitig.,Both spoke at the same time.,
+76,endlich,,,finally; at last,adverb,Endlich bist du da!,You are finally here!,
+77,schon,,,already,adverb,Bist du schon fertig?,Are you finished already?,
+78,noch,,,still; yet,adverb,Er schläft noch.,He is still asleep.,
+79,bereits,,,already,adverb,Der Zug ist bereits weg.,The train has already left.,
+80,immer,,,always,adverb,Er kommt immer zu spät.,He is always late.,
+81,nie,,,never,adverb,Ich war noch nie in Berlin.,I have never been to Berlin.,niemals
+82,oft,,,often,adverb,Wir gehen oft ins Kino.,We often go to the cinema.,
+83,manchmal,,,sometimes,adverb,Manchmal koche ich selbst.,Sometimes I cook myself.,
+84,selten,,,rarely; seldom,adverb,Er ruft nur selten an.,He rarely calls.,
+85,häufig,,,frequently,adverb,Das passiert häufig.,That happens frequently.,
+86,täglich,,,daily,adverb,Sie geht täglich spazieren.,She goes for a walk daily.,
+87,wöchentlich,,,weekly,adverb,Der Kurs findet wöchentlich statt.,The course takes place weekly.,
+88,monatlich,,,monthly,adverb,Die Miete zahlt man monatlich.,The rent is paid monthly.,
+89,jährlich,,,yearly; annually,adverb,Das Fest findet jährlich statt.,The festival takes place annually.,
+90,montags,,,on Mondays,adverb,Montags ist das Museum zu.,The museum is closed on Mondays.,
+91,früh,,,early,adjective,Ich stehe früh auf.,I get up early.,
+92,spät,,,late,adjective,Es ist schon spät.,It is already late.,
+93,pünktlich,,,punctual; on time,adjective,Der Zug war pünktlich.,The train was on time.,
+94,rechtzeitig,,,in time,adjective,Wir kamen rechtzeitig an.,We arrived in time.,
+95,lange,,,for a long time,adverb,Wir haben lange gewartet.,We waited for a long time.,
+96,kurz,,,short; briefly,adjective,Das Treffen war kurz.,The meeting was short.,
+97,dauern,,,to last; to take (time),verb,Wie lange dauert der Film?,How long does the film last?,
+98,beginnen,,,to begin,verb,Der Film beginnt um acht.,The film begins at eight.,
+99,anfangen,,,to start,verb,Wann fangen wir an?,When do we start?,
+100,aufhören,,,to stop,verb,Der Regen hört nicht auf.,The rain will not stop.,
+101,enden,,,to end,verb,Der Kurs endet im Juli.,The course ends in July.,
+102,warten,,,to wait,verb,Wir warten auf den Bus.,We are waiting for the bus.,
+103,verbringen,,,to spend (time),verb,Wir verbringen den Sommer am See.,We spend the summer at the lake.,
+104,sich beeilen,,,to hurry,verb,"Beeil dich, wir sind spät dran!","Hurry up, we are late!",
+105,Verspätung,die,Verspätungen,delay,noun,Der Zug hat Verspätung.,The train is delayed.,
+106,Pause,die,Pausen,break; pause,noun,Wir machen eine kurze Pause.,We are taking a short break.,
+107,Anfang,der,Anfänge,beginning,noun,Am Anfang war es schwer.,At the beginning it was hard.,
+108,Ende,das,Enden,end,noun,Am Ende waren alle zufrieden.,In the end everyone was happy.,
+109,Dauer,die,,duration,noun,Die Dauer des Fluges ist zwei Stunden.,The duration of the flight is two hours.,
+110,Zukunft,die,,future,noun,Was bringt die Zukunft?,What will the future bring?,
+111,Vergangenheit,die,,past,noun,Das gehört der Vergangenheit an.,That belongs to the past.,
+112,Gegenwart,die,,present,noun,Wir leben in der Gegenwart.,We live in the present.,
+113,Alter,das,,age,noun,In welchem Alter warst du dort?,At what age were you there?,
+114,Geburtstag,der,Geburtstage,birthday,noun,Heute ist mein Geburtstag.,Today is my birthday.,
+115,seit,,,since; for,preposition,Ich wohne seit drei Jahren hier.,I have lived here for three years.,
+116,bis,,,until,preposition,Ich warte bis morgen.,I will wait until tomorrow.,
+117,während,,,during,preposition,Während des Essens sprachen wir wenig.,During the meal we spoke little.,
+118,ab,,,from (a time on),preposition,Ab Montag bin ich im Urlaub.,From Monday I am on vacation.,
+119,vor,,,before; ago,preposition,Vor einer Woche war ich krank.,A week ago I was sick.,
+120,nach,,,after,preposition,Nach dem Essen gehen wir spazieren.,After the meal we go for a walk.,

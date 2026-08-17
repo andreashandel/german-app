@@ -470,5 +470,145 @@ ok('sentence ends like a sentence', /[.!?]$/.test(said), said);
 $('btn-quit').click();
 await settle();
 
+/* ------------------------------------------------- Enter key behaviour --- */
+// Regression: Enter used to check the answer and then immediately advance,
+// because the keydown bubbled to the document handler whose guard submit() had
+// just satisfied. One press must check and stop.
+
+const pressEnter = (el) => {
+  const ev = new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+  el.dispatchEvent(ev);
+};
+
+$('btn-pos-core').click();
+$('opt-length').value = '10'; fire($('opt-length'), 'input');
+$('btn-typing').click();
+await settle();
+ok('enter test: session started', $('session-counter').textContent === '1 / 10');
+
+$('answer-input').value = 'definitely wrong';
+pressEnter($('answer-input'));
+await settle();
+ok('enter checks the answer', $('feedback').hidden === false);
+ok('enter does not advance', $('session-counter').textContent === '1 / 10',
+  $('session-counter').textContent);
+ok('enter shows the correct answer', $('correct-answer').textContent.length > 0);
+ok('enter locks the input', $('answer-input').disabled === true);
+
+// A second press, now that the input is disabled, moves on.
+pressEnter($('btn-next'));
+await settle();
+ok('second enter advances', $('session-counter').textContent === '2 / 10',
+  $('session-counter').textContent);
+ok('second enter advances exactly one card', $('feedback').hidden === true);
+
+// Enter on an empty box should still grade (as wrong), not silently do nothing.
+$('answer-input').value = '';
+pressEnter($('answer-input'));
+await settle();
+ok('enter on empty input still checks', $('feedback').hidden === false);
+ok('empty answer counts as wrong', $('verdict').classList.contains('wrong'));
+
+$('btn-quit').click();
+await settle();
+
+/* ------------------------------------------------------------ sliders --- */
+
+ok('range start is a slider', $('range-start').type === 'range');
+ok('range end is a slider', $('range-end').type === 'range');
+ok('length is a slider', $('opt-length').type === 'range');
+
+$('range-start').value = '10'; fire($('range-start'), 'input');
+$('range-end').value = '60'; fire($('range-end'), 'input');
+await settle();
+ok('slider values shown', $('range-start-out').textContent === '10' && $('range-end-out').textContent === '60',
+  $('range-start-out').textContent + '/' + $('range-end-out').textContent);
+ok('slider range selects', $('selection-count').textContent.startsWith('51 words'),
+  $('selection-count').textContent);
+
+// Dragging start past end pushes end along rather than being blocked.
+$('range-start').value = '90'; fire($('range-start'), 'input');
+await settle();
+ok('start pushes end', parseInt($('range-end').value, 10) === 90, $('range-end').value);
+ok('pushed end shown', $('range-end-out').textContent === '90');
+ok('pushed range is one word', $('selection-count').textContent.startsWith('1 word'),
+  $('selection-count').textContent);
+
+// Dragging end below start pushes start back down.
+$('range-end').value = '40'; fire($('range-end'), 'input');
+await settle();
+ok('end pushes start', parseInt($('range-start').value, 10) === 40, $('range-start').value);
+
+$('range-start').value = '1'; fire($('range-start'), 'input');
+$('range-end').value = '200'; fire($('range-end'), 'input');
+await settle();
+
+// The length slider is bounded by the selection and says "all" at the top.
+const selNow = parseInt($('selection-count').textContent, 10);
+ok('length slider max tracks selection',
+  parseInt($('opt-length').max, 10) === Math.max(5, Math.min(selNow, 200)),
+  $('opt-length').max + ' vs ' + selNow);
+
+$('opt-length').value = '35'; fire($('opt-length'), 'input');
+await settle();
+ok('length value shown', $('opt-length-out').textContent === '35', $('opt-length-out').textContent);
+
+$('opt-length').value = $('opt-length').max; fire($('opt-length'), 'input');
+await settle();
+ok('length at max reads as all', /^all /.test($('opt-length-out').textContent),
+  $('opt-length-out').textContent);
+
+$('opt-length').value = '10'; fire($('opt-length'), 'input');
+await settle();
+
+/* --------------------------------------------------- word type on card --- */
+
+// Narrow to nouns so the label is predictable.
+$('btn-pos-none').click();
+const nounOnly = [...$('pos-filter').querySelectorAll('input')].find((i) => i.value === 'noun');
+nounOnly.checked = true; fire(nounOnly, 'change');
+await settle();
+$('btn-typing').click();
+await settle();
+ok('word type shown on card', $('card-pos').hidden === false);
+ok('word type says noun', /noun/i.test($('card-pos').textContent), $('card-pos').textContent);
+ok('direction label still present', $('card-direction').textContent.includes('→'));
+
+$('btn-quit').click();
+await settle();
+
+/* ----------------------------------------------------------- menu button - */
+
+ok('back button is labelled', /menu/i.test($('btn-quit').textContent), $('btn-quit').textContent);
+ok('back button explains itself', /menu/i.test($('btn-quit').getAttribute('aria-label')));
+
+/* -------------------------------------- range survives a smaller deck ---- */
+// A range set on the 500-word list must not outrun a 115-word one.
+
+$('btn-pos-all').click();
+deckSel.value = 'builtin:de-top500';
+fire(deckSel, 'change');
+await settle();
+$('range-start').value = '300'; fire($('range-start'), 'input');
+$('range-end').value = '480'; fire($('range-end'), 'input');
+await settle();
+ok('wide range set on big deck', $('selection-count').textContent.startsWith('181 words'),
+  $('selection-count').textContent);
+
+deckSel.value = 'builtin:de-numbers';
+fire(deckSel, 'change');
+await settle();
+ok('sliders rebounded to smaller deck', parseInt($('range-start').max, 10) === 115,
+  $('range-start').max);
+ok('start pulled back into range', parseInt($('range-start').value, 10) <= 115,
+  $('range-start').value);
+ok('end pulled back into range', parseInt($('range-end').value, 10) <= 115, $('range-end').value);
+ok('start not past end', parseInt($('range-start').value, 10) <= parseInt($('range-end').value, 10));
+ok('smaller deck still selects words', /^\d+ words/.test($('selection-count').textContent),
+  $('selection-count').textContent);
+ok('outputs match the sliders',
+  $('range-start-out').textContent === $('range-start').value &&
+  $('range-end-out').textContent === $('range-end').value);
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

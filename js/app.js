@@ -121,12 +121,18 @@ async function activateDeck(value) {
 
   const extent = rankExtent(state.words);
   $('deck-summary').textContent = `${state.words.length} words loaded`;
+  // Both sliders are rebounded to the new deck. A range left over from a bigger
+  // deck would otherwise be clamped by the browser while the stored settings
+  // kept the old numbers, and the two would disagree about what is selected.
   $('range-start').max = String(extent.max);
   $('range-end').max = String(extent.max);
-  if (state.settings.end > extent.max) {
-    state.settings.end = Math.min(100, extent.max);
-    $('range-end').value = String(state.settings.end);
-  }
+
+  if (state.settings.end > extent.max) state.settings.end = Math.min(100, extent.max);
+  if (state.settings.start > extent.max) state.settings.start = 1;
+  if (state.settings.start > state.settings.end) state.settings.start = 1;
+
+  $('range-start').value = String(state.settings.start);
+  $('range-end').value = String(state.settings.end);
 
   buildPosFilter();
   refreshSelection();
@@ -165,6 +171,32 @@ function currentSelection() {
   });
 }
 
+function syncRangeOutputs() {
+  $('range-start-out').textContent = $('range-start').value;
+  $('range-end-out').textContent = $('range-end').value;
+}
+
+/**
+ * The length slider is bounded by how many words are actually selected, and
+ * reads "All" at the top so picking everything is a deliberate position on the
+ * scale rather than a magic number.
+ */
+function syncLengthOutput(selectedCount) {
+  const count = typeof selectedCount === 'number' ? selectedCount : currentSelection().length;
+  const slider = $('opt-length');
+  const max = Math.max(5, Math.min(count || 5, 200));
+
+  slider.max = String(max);
+  if (parseInt(slider.value, 10) > max) {
+    slider.value = String(max);
+    state.settings.sessionLength = max;
+  }
+
+  const value = parseInt(slider.value, 10);
+  $('opt-length-out').textContent =
+    count > 0 && value >= count ? `all ${count}` : String(value);
+}
+
 function refreshSelection() {
   const selected = currentSelection();
   const countEl = $('selection-count');
@@ -191,6 +223,9 @@ function refreshSelection() {
   $('btn-hard').textContent = `Practice hard words (${hard})`;
   $('btn-due').disabled = due === 0;
   $('btn-hard').disabled = hard === 0;
+
+  syncRangeOutputs();
+  syncLengthOutput(selected.length);
 }
 
 function persistSettings() {
@@ -205,6 +240,7 @@ function applySettingsToForm() {
   $('opt-examples').checked = state.settings.showExamples;
   $('opt-audio').checked = state.settings.audio;
   $('opt-length').value = String(state.settings.sessionLength);
+  syncRangeOutputs();
   document.querySelector(`input[name="rangeMode"][value="${state.settings.rangeMode}"]`).checked = true;
   document.querySelector(`input[name="direction"][value="${state.settings.direction}"]`).checked = true;
 }
@@ -283,6 +319,14 @@ function renderCard() {
   $('session-counter').textContent = `${session.index + 1} / ${session.cards.length}`;
   $('progress-fill').style.width = `${(session.index / session.cards.length) * 100}%`;
   $('card-direction').textContent = `${card.fromLabel} → ${card.toLabel}`;
+
+  // Which part of speech is being asked for. Without it an English prompt like
+  // "date" is ambiguous between the noun and the verb, and there is no way to
+  // know which German word is wanted.
+  const posLabel = POS_LABELS[card.word.pos];
+  const showPos = Boolean(posLabel) && card.word.pos !== 'other';
+  $('card-pos').textContent = posLabel || '';
+  $('card-pos').hidden = !showPos;
   $('card-prompt').textContent = card.prompt;
 
   // A plural is a hint about the word being asked, so it only shows on the
@@ -543,14 +587,27 @@ function wireSetup() {
     }
   });
 
-  const onRange = () => {
-    state.settings.start = parseInt($('range-start').value, 10) || 1;
-    state.settings.end = parseInt($('range-end').value, 10) || 1;
+  // Two sliders over one range: whichever one is being dragged pushes the
+  // other rather than being clamped by it, so neither can trap the other.
+  const onRange = (moved) => {
+    let start = parseInt($('range-start').value, 10) || 1;
+    let end = parseInt($('range-end').value, 10) || 1;
+
+    if (start > end) {
+      if (moved === 'start') end = start;
+      else start = end;
+      $('range-start').value = String(start);
+      $('range-end').value = String(end);
+    }
+
+    state.settings.start = start;
+    state.settings.end = end;
+    syncRangeOutputs();
     persistSettings();
     refreshSelection();
   };
-  $('range-start').addEventListener('input', onRange);
-  $('range-end').addEventListener('input', onRange);
+  $('range-start').addEventListener('input', () => onRange('start'));
+  $('range-end').addEventListener('input', () => onRange('end'));
 
   document.querySelectorAll('input[name="rangeMode"]').forEach((el) =>
     el.addEventListener('change', () => {
@@ -587,8 +644,14 @@ function wireSetup() {
   bindOption('opt-examples', 'showExamples');
   bindOption('opt-audio', 'audio');
 
+  $('opt-length').addEventListener('input', () => {
+    state.settings.sessionLength = parseInt($('opt-length').value, 10) || 5;
+    syncLengthOutput();
+    persistSettings();
+  });
   $('opt-length').addEventListener('change', (e) => {
-    state.settings.sessionLength = parseInt(e.target.value, 10);
+    state.settings.sessionLength = parseInt(e.target.value, 10) || 5;
+    syncLengthOutput();
     persistSettings();
   });
 
@@ -657,10 +720,13 @@ function wireSession() {
 
   $('btn-check').addEventListener('click', submit);
   $('answer-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      submit();
-    }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    // Consume the key. The document-level handler below also acts on Enter,
+    // and submit() reveals the feedback that its guard looks for — so without
+    // this the one press would check the answer and skip straight past it.
+    e.stopPropagation();
+    submit();
   });
 
   // Each press uncovers one more letter, stopping one short of the whole word.
@@ -761,6 +827,13 @@ async function init() {
   }
   // A stored filter naming a type this deck lacks would silently select nothing.
   state.settings.posFilter = state.settings.posFilter.filter((p) => POS_VALUES.includes(p));
+
+  // Session length used to be a dropdown where 0 meant "all selected". The
+  // slider has no 0, and letting it clamp would quietly turn "all" into the
+  // minimum, so anything below the slider's floor goes back to the default.
+  if (!Number.isFinite(state.settings.sessionLength) || state.settings.sessionLength < 5) {
+    state.settings.sessionLength = 20;
+  }
 
   state.streak = loadStreak();
   renderStreak();

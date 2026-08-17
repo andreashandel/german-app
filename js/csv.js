@@ -80,6 +80,10 @@ const COLUMN_ALIASES = {
   pos: ['pos', 'type', 'wordtype', 'word_type', 'wortart', 'part_of_speech', 'partofspeech'],
   example_de: ['example_de', 'beispiel', 'beispiel_de', 'example', 'satz'],
   example_en: ['example_en', 'beispiel_en', 'example_translation'],
+  // Further German words meaning the same thing. Accepted when answering, and
+  // shown with the answer, but never the prompt: "nie" and "niemals" are one
+  // vocabulary item, not two cards.
+  also: ['also', 'alt', 'alternative', 'alternatives', 'synonym', 'synonyms', 'auch'],
 };
 
 function pickColumn(row, logical) {
@@ -159,6 +163,10 @@ export function toWords(rows) {
       article: VALID_ARTICLES.includes(article) ? article : '',
       plural: pickColumn(row, 'plural'),
       english: englishRaw
+        .split(';')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      also: pickColumn(row, 'also')
         .split(';')
         .map((s) => s.trim())
         .filter(Boolean),

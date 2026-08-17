@@ -12,19 +12,30 @@ runtime dependencies. Open `index.html` through any web server and it runs.
 
 ## Using it
 
-**Which words.** Pick a list from the dropdown, set a `From`–`To` range over it,
-and tick the word types you want. The radio buttons underneath decide what those
-numbers mean:
+**Which words.** Pick a list from the dropdown, drag the `From` and `To` sliders
+to a stretch of it, and tick the word types you want. The sliders push each
+other rather than blocking — dragging `From` past `To` carries `To` along — and
+they rescale when you switch to a shorter list. The radio buttons underneath
+decide what those numbers mean:
 
 - *positions on the full list* — `200`–`400` is literally ranks 200 to 400,
   then narrowed to the types you ticked.
 - *positions within the chosen types* — tick only Nouns and `1`–`100` gives the
   hundred most common nouns.
 
+**How many.** *Words per session* under Options is a slider bounded by how many
+words are currently selected. At the top of its travel it reads "all N" — so
+picking everything is a position on the scale rather than a special value.
+
+Every card names the **part of speech** it is asking for. Without it an English
+prompt like *date* is ambiguous between the noun and the verb, and there is no
+way to know which German word is wanted.
+
 **How to practise.**
 
-- **Typing** — type the translation and get it checked (see below). **Hint**
-  uncovers a letter at a time if she is stuck.
+- **Typing** — type the translation and get it checked (see below). **Enter**
+  does the same as the *Check* button; a second press moves to the next card.
+  **Hint** uncovers a letter at a time if she is stuck.
 - **Flashcards** — reveal the answer, then grade yourself *Again / Good / Easy*.
   The grade feeds the review scheduler.
 - **Browse** — the current selection as a sortable, searchable table.
@@ -150,6 +161,7 @@ Everything else is optional.
 | `pos`        | no       | One of `noun, verb, adjective, adverb, pronoun, preposition, conjunction, article, numeral, other`. Defaults to `other`. |
 | `example_de` | no       | Example sentence, shown after answering.                      |
 | `example_en` | no       | Its translation.                                              |
+| `also`       | no       | Other German words meaning the same thing, separated by `;`. Accepted as answers and shown with the correct one, but never used as the prompt. |
 
 Header names are matched loosely and German names work too — `Wort`,
 `Übersetzung`, `Wortart`, `Artikel`, `Beispiel` are all recognised, as are
@@ -167,6 +179,11 @@ Katze,cat
 Save as UTF-8. Quote any field containing a comma. If two entries share a
 headword they must differ in `pos` — that is how `das Essen` (noun) and `essen`
 (verb) stay separate, including in your progress history.
+
+Use `also` for genuine synonyms rather than adding a second row. `never` is one
+vocabulary item that happens to have two German words, so `nie` with
+`also=niemals` accepts either and teaches both; two rows would instead make two
+cards and mark `nie` wrong on the `niemals` one.
 
 ### The bundled lists
 

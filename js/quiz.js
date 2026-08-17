@@ -97,11 +97,13 @@ export function acceptedAnswers(word, dir, { requireArticle = false } = {}) {
     return out;
   }
 
-  if (word.article) {
-    out.add(normalise(`${word.article} ${word.german}`));
-    if (!requireArticle) out.add(normalise(word.german));
-  } else {
-    out.add(normalise(word.german));
+  for (const form of [word.german, ...(word.also || [])]) {
+    if (word.article) {
+      out.add(normalise(`${word.article} ${form}`));
+      if (!requireArticle) out.add(normalise(form));
+    } else {
+      out.add(normalise(form));
+    }
   }
   return out;
 }
@@ -135,9 +137,11 @@ export function checkAnswer(input, word, dir, opts = {}) {
     if (leading) guess = guess.slice(leading[0].length);
   }
 
+  // The article has already been checked and stripped above, so what remains to
+  // match is the bare headword or any of its alternatives.
   const accepted =
     dir === 'en-de' && word.article
-      ? new Set([normalise(word.german)])
+      ? new Set([word.german, ...(word.also || [])].map(normalise))
       : acceptedAnswers(word, dir, { requireArticle });
 
   // Answering an English noun as "the year" is as right as "year", so try the
@@ -212,9 +216,17 @@ export function hintFor(card, level) {
   return card.dir === 'en-de' && card.word.article ? `··· ${masked}` : masked;
 }
 
-/** What the card shows as the correct answer once it is revealed. */
+/**
+ * What the card shows as the correct answer once it is revealed. Alternatives
+ * are listed too, so she learns that "niemals" exists rather than just being
+ * told her answer was accepted.
+ */
 export function expectedAnswer(word, dir) {
-  return dir === 'de-en' ? englishDisplay(word) : germanDisplay(word);
+  if (dir === 'de-en') return englishDisplay(word);
+  const alts = (word.also || []).map((alt) =>
+    word.article ? `${word.article} ${alt}` : alt
+  );
+  return [germanDisplay(word), ...alts].join(' / ');
 }
 
 export function promptFor(word, dir) {
