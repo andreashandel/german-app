@@ -12,15 +12,33 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="German" />
     <link rel="apple-touch-icon" href="icons/icon-180.png" />
-    <link rel="icon" href="icons/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
   </head>
   <body>
     <div id="app">
       <!-- ============================ SETUP ============================ -->
       <section id="screen-setup" class="screen">
-        <header class="app-header">
-          <h1>German Vocabulary</h1>
-          <p class="sub" id="deck-summary">Loading…</p>
+        <header class="app-header with-logo">
+          <svg class="logo" viewBox="0 0 512 512" role="img" aria-label="Pretzel" focusable="false">
+            <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                class="logo-crust"
+                stroke-width="58"
+                d="M136.5 266C103 324 116 397.7 167.3 440.7C218.6 483.8 293.4 483.8 344.7 440.7C396 397.7 409 324 375.5 266M136.5 266C94 192 102 104 172 90C228 126 290 178 352 246M375.5 266C418 192 410 104 340 90C284 126 222 178 160 246"
+              />
+              <path
+                class="logo-dough"
+                stroke-width="46"
+                d="M136.5 266C103 324 116 397.7 167.3 440.7C218.6 483.8 293.4 483.8 344.7 440.7C396 397.7 409 324 375.5 266M136.5 266C94 192 102 104 172 90C228 126 290 178 352 246M375.5 266C418 192 410 104 340 90C284 126 222 178 160 246"
+              />
+            </g>
+          </svg>
+          <div>
+            <h1>German Vocabulary</h1>
+            <p class="sub" id="deck-summary">Loading…</p>
+          </div>
         </header>
 
         <div class="card">
@@ -132,6 +150,11 @@
 
         <div class="card">
           <h2>Your progress</h2>
+          <p class="streak-chip cold" id="streak-chip">
+            <span class="streak-icon" aria-hidden="true">🥨</span>
+            <span class="streak-label" id="streak-label">Practice today to start a streak</span>
+            <span class="streak-best" id="streak-best" hidden></span>
+          </p>
           <p class="stats" id="progress-stats">—</p>
           <div class="row wrap">
             <button type="button" class="ghost small" id="btn-due">Review what is due</button>
@@ -222,7 +245,17 @@
                 hidden
               >🔊</button>
             </p>
-            <p class="example" id="example-line"></p>
+            <p class="example" id="example-line">
+              <span id="example-text"></span>
+              <button
+                type="button"
+                class="speak-btn"
+                id="btn-speak-example"
+                aria-label="Hear the German example sentence"
+                title="Hear the sentence"
+                hidden
+              >🔊</button>
+            </p>
             <button type="button" class="secondary wide" id="btn-next">Next</button>
           </div>
         </div>
@@ -233,6 +266,7 @@
         <header class="app-header">
           <h1>Session complete</h1>
           <p class="sub" id="summary-score"></p>
+          <p class="summary-streak" id="summary-streak" hidden></p>
         </header>
         <div class="card">
           <h2 id="missed-heading">Words to review</h2>

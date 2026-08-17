@@ -33,6 +33,23 @@ numbers mean:
 than the range: due words are ones whose Leitner interval has elapsed, hard
 words are ones answered wrong at least a third of the time.
 
+### The streak
+
+The chip at the top of the setup screen counts consecutive days practised. It
+turns green once the day is banked and shows your best run alongside the current
+one.
+
+A day counts from the **first answer you grade**, not from finishing a session —
+abandoning a session halfway still counts, because you did practise. Days are
+local calendar days, so 11pm and then 8am the next morning is two days, not one.
+Miss a day and the count restarts at 1, though your best is kept. Yesterday
+still counts as live: the streak only reads as broken once a whole day has gone
+by without practice.
+
+The streak spans every deck — five minutes of food words keeps it alive just as
+well as the main list. It is stored separately from per-deck progress, and is
+not included in the progress export.
+
 ### How answers are checked
 
 Typed answers are graded generously, because the point is recall, not fighting
@@ -75,9 +92,30 @@ the answer when translating into it, so it always follows the German side. There
 is also a *Read the German word aloud* option that plays every card
 automatically without pressing anything.
 
+A second **🔊** sits beside the German **example sentence** once the answer is
+revealed, and reads the whole sentence. Hearing a word inside a sentence is
+where the stress and rhythm actually live, so it is worth more than the headword
+on its own. It is always manual — the auto-play option only ever reads the
+single word, since having a full sentence fire on every card would wear thin.
+
 Pronunciation needs no network and no API key, but it does depend on the device
 having a German voice — every current iPad does. Where speech is unavailable the
 buttons simply do not appear.
+
+### The pretzel
+
+The app's mark is a Brezel, used for the home-screen icon, the browser tab and
+the header. It is generated rather than drawn by hand:
+
+```bash
+python tools/make-icons.py
+```
+
+That rewrites every file in `icons/` and prints the SVG path used by the inline
+logo in `index.html`, so the icon and the in-app logo come from one geometry and
+cannot drift apart. Editing the curve means editing the control points at the
+top of that script. It needs Pillow, and is the only part of the project that
+touches Python — the app itself is unaffected.
 
 ## Adding your own word list
 
@@ -198,9 +236,11 @@ js/app.js                UI wiring and state
 js/csv.js                CSV parsing, column aliases, word normalisation
 js/deck.js               range and part-of-speech selection
 js/quiz.js               card generation and answer grading
-js/progress.js           localStorage, Leitner scheduling, export/import
-data/de-top500.csv       the bundled word list
+js/progress.js           localStorage, Leitner scheduling, streak, export/import
+data/*.csv               the bundled word lists
 data/manifest.json       which decks appear in the dropdown
+icons/                   generated app icons
+tools/make-icons.py      regenerates icons/ and the logo path
 sw.js                    offline cache
 ```
 

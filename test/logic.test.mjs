@@ -5,7 +5,10 @@ import {
   checkAnswer, normalise, acceptedAnswers, makeCard,
   hintMask, hintLength, hintFor, hintMax,
 } from '../js/quiz.js';
-import { recordResult } from '../js/progress.js';
+import {
+  recordResult,
+  emptyStreak, recordPractice, currentStreak, practisedToday,
+} from '../js/progress.js';
 
 let pass = 0, fail = 0;
 const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.log('FAIL:', name); } };
@@ -181,6 +184,59 @@ ok('good still advances after hint', prog.x.box === afterGood.box + 1);
 const prog2 = {};
 recordResult(prog2, 'y', 'hint');
 ok('hint from scratch stays box 1', prog2.y.box === 1);
+
+// --- streak ---------------------------------------------------------------
+// Local dates on purpose: the streak follows the day she is living in.
+const at = (y, m, d, h = 12) => new Date(y, m - 1, d, h).getTime();
+
+let s = emptyStreak();
+ok('fresh streak is 0', currentStreak(s, at(2026, 3, 1)) === 0);
+ok('fresh streak not practised today', practisedToday(s, at(2026, 3, 1)) === false);
+
+let r = recordPractice(s, at(2026, 3, 1, 9));
+s = r.streak;
+ok('first practice advances', r.advanced === true && s.current === 1);
+ok('first practice sets best', s.best === 1);
+ok('practised today', practisedToday(s, at(2026, 3, 1, 22)) === true);
+
+r = recordPractice(s, at(2026, 3, 1, 22));
+s = r.streak;
+ok('second answer same day does not advance', r.advanced === false && s.current === 1);
+ok('same day does not inflate totalDays', s.totalDays === 1);
+
+s = recordPractice(s, at(2026, 3, 2, 8)).streak;
+ok('next day continues streak', s.current === 2);
+s = recordPractice(s, at(2026, 3, 3, 8)).streak;
+ok('third day continues', s.current === 3 && s.best === 3);
+
+// late night then early morning is two separate days, not one
+let night = emptyStreak();
+night = recordPractice(night, at(2026, 3, 1, 23)).streak;
+night = recordPractice(night, at(2026, 3, 2, 7)).streak;
+ok('23:00 then 07:00 counts as two days', night.current === 2);
+
+// a missed day resets the count but keeps the record
+s = recordPractice(s, at(2026, 3, 5, 8)).streak;
+ok('gap resets to 1', s.current === 1);
+ok('gap keeps best', s.best === 3);
+ok('gap counts a new practice day', s.totalDays === 4); // Mar 1, 2, 3, 5
+
+ok('yesterday still counts as live', currentStreak(s, at(2026, 3, 6)) === 1);
+ok('two days later reads as broken', currentStreak(s, at(2026, 3, 7)) === 0);
+ok('stored count survives the lapse', s.current === 1);
+
+// month and year boundaries go through setDate, not millisecond arithmetic
+let edge = emptyStreak();
+edge = recordPractice(edge, at(2026, 3, 31)).streak;
+edge = recordPractice(edge, at(2026, 4, 1)).streak;
+ok('month boundary continues', edge.current === 2);
+edge = recordPractice(edge, at(2026, 4, 2)).streak;
+ok('month boundary keeps counting', edge.current === 3);
+
+let ny = emptyStreak();
+ny = recordPractice(ny, at(2026, 12, 31)).streak;
+ny = recordPractice(ny, at(2027, 1, 1)).streak;
+ok('year boundary continues', ny.current === 2);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

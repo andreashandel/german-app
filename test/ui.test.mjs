@@ -414,5 +414,61 @@ fire(deckSel, 'change');
 await settle();
 ok('time deck loaded', $('deck-summary').textContent === '120 words loaded', $('deck-summary').textContent);
 
+/* -------------------------------------------------- streak, logo, audio -- */
+
+ok('logo rendered in header', window.document.querySelector('.app-header .logo') !== null);
+ok('logo has both strokes',
+  window.document.querySelectorAll('.logo path').length === 2);
+ok('logo paths identical',
+  window.document.querySelector('.logo-crust').getAttribute('d') ===
+  window.document.querySelector('.logo-dough').getAttribute('d'));
+
+// A session ran earlier in this file, so today is already credited.
+const streakRaw = window.localStorage.getItem('germanapp:streak:v1');
+ok('streak persisted', streakRaw !== null);
+const streakRec = JSON.parse(streakRaw || '{}');
+ok('streak counted one day', streakRec.current === 1, String(streakRec.current));
+ok('streak recorded best', streakRec.best === 1);
+ok('streak chip reads live', $('streak-chip').classList.contains('done-today'));
+ok('streak chip not cold', $('streak-chip').classList.contains('cold') === false);
+ok('streak label mentions the run', /1 day in a row/.test($('streak-label').textContent),
+  $('streak-label').textContent);
+
+// The summary line only appears once there is a streak to report.
+deckSel.value = 'builtin:de-top500';
+fire(deckSel, 'change');
+await settle();
+$('btn-pos-core').click();
+$('opt-length').value = '10'; fire($('opt-length'), 'change');
+$('btn-typing').click();
+await settle();
+
+// The example speaker only appears once the answer is revealed.
+ok('example speaker hidden before answering', $('btn-speak-example').hidden === true);
+
+$('answer-input').value = 'nope';
+$('btn-check').click();
+await settle();
+
+const exampleCard = $('card-prompt').textContent;
+ok('example speaker shown after answering', $('btn-speak-example').hidden === false);
+ok('example text rendered', $('example-text').textContent.length > 0);
+ok('speaker sits beside the German sentence',
+  $('btn-speak-example').parentElement.tagName === 'EM');
+
+const beforeExample = spoken.length;
+$('btn-speak-example').click();
+await settle();
+ok('example speaker speaks', spoken.length === beforeExample + 1, String(spoken.length));
+
+// The whole point: it must read the sentence, not the headword.
+const said = spoken[spoken.length - 1] || '';
+ok('speaks a full sentence', said.length > exampleCard.length && /\s/.test(said), said);
+ok('speaks the German example, not the English', !/^(the|a|an)\s/i.test(said), said);
+ok('sentence ends like a sentence', /[.!?]$/.test(said), said);
+
+$('btn-quit').click();
+await settle();
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

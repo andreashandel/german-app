@@ -7,6 +7,9 @@
 
 const PROGRESS_KEY = (deckId) => `germanapp:progress:v1:${deckId}`;
 const SETTINGS_KEY = 'germanapp:settings:v1';
+// The streak spans every deck: practising food words keeps it alive just as
+// well as the main list.
+const STREAK_KEY = 'germanapp:streak:v1';
 
 // Days until a word in each box comes back around.
 const BOX_INTERVALS = [0, 1, 3, 7, 21];
@@ -136,6 +139,95 @@ export function resetProgress(deckId) {
     /* nothing to do */
   }
 }
+
+/* ------------------------------------------------------------- streak ---- */
+
+/**
+ * Local calendar day. Deliberately not UTC: a streak should follow the day she
+ * is living in, so practising at 11pm and again at 8am is two days.
+ */
+function dayKey(ts) {
+  const d = new Date(ts);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Day arithmetic via setDate so month ends and DST shifts stay correct. */
+function shiftDay(ts, days) {
+  const d = new Date(ts);
+  d.setDate(d.getDate() + days);
+  return dayKey(d.getTime());
+}
+
+export function emptyStreak() {
+  return { current: 0, best: 0, lastDay: null, totalDays: 0 };
+}
+
+export function loadStreak() {
+  try {
+    const raw = localStorage.getItem(STREAK_KEY);
+    return raw ? { ...emptyStreak(), ...JSON.parse(raw) } : emptyStreak();
+  } catch {
+    return emptyStreak();
+  }
+}
+
+export function saveStreak(streak) {
+  try {
+    localStorage.setItem(STREAK_KEY, JSON.stringify(streak));
+  } catch {
+    /* non-fatal, same as progress */
+  }
+}
+
+/**
+ * Credit today towards the streak.
+ *
+ * Called on the first graded answer of the day, so the streak counts days
+ * practised rather than sessions finished — quitting a session halfway still
+ * counts, which is the honest reading of "she practised today". Repeat calls
+ * on the same day are no-ops.
+ */
+export function recordPractice(streak, now = Date.now()) {
+  const today = dayKey(now);
+  if (streak.lastDay === today) return { streak, advanced: false };
+
+  const next = {
+    ...streak,
+    current: streak.lastDay === shiftDay(now, -1) ? (streak.current || 0) + 1 : 1,
+    lastDay: today,
+    totalDays: (streak.totalDays || 0) + 1,
+  };
+  next.best = Math.max(streak.best || 0, next.current);
+  return { streak: next, advanced: true };
+}
+
+/**
+ * The streak as it stands right now. A stored count is stale once a day has
+ * been missed, so a gap reads as 0 rather than showing yesterday's number
+ * indefinitely. Yesterday still counts: the day is not over until it is.
+ */
+export function currentStreak(streak, now = Date.now()) {
+  if (!streak || !streak.lastDay) return 0;
+  const today = dayKey(now);
+  return streak.lastDay === today || streak.lastDay === shiftDay(now, -1)
+    ? streak.current
+    : 0;
+}
+
+export function practisedToday(streak, now = Date.now()) {
+  return Boolean(streak) && streak.lastDay === dayKey(now);
+}
+
+export function resetStreak() {
+  try {
+    localStorage.removeItem(STREAK_KEY);
+  } catch {
+    /* nothing to do */
+  }
+}
+
+/* ----------------------------------------------------------- settings ---- */
 
 export function loadSettings() {
   try {

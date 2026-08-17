@@ -1,3 +1,2 @@
-- Add option to hear pronounciation of german example sentences.
-- Add streak feature.
-- 
+- Turn the 'from' and 'to' fields that allow one to pick words into sliders
+- instead of fixing at 20, allow user to choose how many practice exercises they want to get

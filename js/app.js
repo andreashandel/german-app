@@ -15,6 +15,11 @@ import {
   resetProgress,
   loadSettings,
   saveSettings,
+  loadStreak,
+  saveStreak,
+  recordPractice,
+  currentStreak,
+  practisedToday,
 } from './progress.js';
 
 const CUSTOM_DECKS_KEY = 'germanapp:decks:v1';
@@ -39,6 +44,8 @@ const state = {
     sessionLength: 20,
   },
   session: null,
+  streak: { current: 0, best: 0, lastDay: null, totalDays: 0 },
+  streakAdvancedThisSession: false,
 };
 
 /* ------------------------------------------------------------------ decks */
@@ -257,6 +264,7 @@ function startSession(mode, words) {
     results: [],
     sourceWords: words,
   };
+  state.streakAdvancedThisSession = false;
 
   $('typing-area').hidden = mode !== 'typing';
   $('flash-area').hidden = mode !== 'flash';
@@ -303,6 +311,8 @@ function renderCard() {
   // answer the other, so it only appears here when German is being shown.
   $('btn-speak-prompt').hidden = !(speechAvailable() && card.dir === 'de-en');
   $('btn-speak-answer').hidden = true;
+  // Belongs to the revealed answer, so it starts hidden on every new card.
+  $('btn-speak-example').hidden = true;
 
   if (session.mode === 'typing') {
     // Focus only on a device with a real keyboard: pulling up the iPad
@@ -345,15 +355,22 @@ function showFeedback({ correct, typo, missingArticle, wrongArticle, hinted }) {
 
   $('correct-answer').textContent = card.expected;
 
-  const exampleEl = $('example-line');
-  if (state.settings.showExamples && card.word.exampleDe) {
-    exampleEl.innerHTML = '';
+  // The example is rebuilt each card. The speak button is a long-lived element
+  // moved in and out of the sentence rather than recreated, so its listener
+  // survives; it sits next to the German line because that is what it reads.
+  const exampleText = $('example-text');
+  const speakExample = $('btn-speak-example');
+  const hasExample = state.settings.showExamples && Boolean(card.word.exampleDe);
+
+  exampleText.replaceChildren();
+  if (hasExample) {
     const de = document.createElement('em');
     de.textContent = card.word.exampleDe;
-    exampleEl.append(de, document.createTextNode(card.word.exampleEn || ''));
-  } else {
-    exampleEl.textContent = '';
+    if (speechAvailable()) de.append(' ', speakExample);
+    exampleText.append(de);
+    if (card.word.exampleEn) exampleText.append(document.createTextNode(card.word.exampleEn));
   }
+  speakExample.hidden = !(hasExample && speechAvailable());
 
   $('btn-speak-answer').hidden = !(speechAvailable() && card.dir === 'en-de');
   $('feedback').hidden = false;
@@ -365,6 +382,40 @@ function gradeCard(grade) {
   recordResult(state.progress, card.word.id, grade);
   saveProgress(state.deckId, state.progress);
   state.session.results.push({ card, correct: grade !== 'again', hinted: grade === 'hint' });
+  creditStreak();
+}
+
+/**
+ * The first graded answer of the day extends the streak. Done here rather than
+ * at the end of a session so that a session she abandons halfway still counts —
+ * she did practise.
+ */
+function creditStreak() {
+  const { streak, advanced } = recordPractice(state.streak);
+  if (!advanced) return;
+  state.streak = streak;
+  state.streakAdvancedThisSession = true;
+  saveStreak(streak);
+  renderStreak();
+}
+
+function renderStreak() {
+  const days = currentStreak(state.streak);
+  const el = $('streak-chip');
+  const label = $('streak-label');
+  const best = $('streak-best');
+
+  el.classList.toggle('cold', days === 0);
+  el.classList.toggle('done-today', practisedToday(state.streak));
+
+  if (days === 0) {
+    label.textContent = state.streak.best ? 'Practice today to start a new streak' : 'Practice today to start a streak';
+  } else {
+    label.textContent = `${days} day${days === 1 ? '' : 's'} in a row`;
+  }
+
+  best.textContent = state.streak.best > 1 ? `best ${state.streak.best}` : '';
+  best.hidden = state.streak.best <= 1;
 }
 
 function nextCard() {
@@ -382,6 +433,13 @@ function finishSession() {
   const hinted = results.filter((r) => r.hinted).length;
   $('summary-score').textContent =
     `${correct} of ${results.length} correct` + (hinted ? ` · ${hinted} with a hint` : '');
+
+  const days = currentStreak(state.streak);
+  const streakEl = $('summary-streak');
+  streakEl.hidden = days === 0;
+  streakEl.textContent = state.streakAdvancedThisSession
+    ? `🥨 ${days} day${days === 1 ? '' : 's'} in a row — today is in the bag`
+    : `🥨 ${days} day${days === 1 ? '' : 's'} in a row`;
   $('missed-heading').textContent = missed.length ? 'Words to review' : 'Nothing missed — nicely done';
 
   const list = $('missed-list');
@@ -619,6 +677,9 @@ function wireSession() {
   const speak = () => speakGerman(currentCard().word.german, { force: true });
   $('btn-speak-prompt').addEventListener('click', speak);
   $('btn-speak-answer').addEventListener('click', speak);
+  $('btn-speak-example').addEventListener('click', () => {
+    speakGerman(currentCard().word.exampleDe, { force: true });
+  });
 
   $('accent-row').addEventListener('click', (e) => {
     const ch = e.target.dataset?.ch;
@@ -700,6 +761,9 @@ async function init() {
   }
   // A stored filter naming a type this deck lacks would silently select nothing.
   state.settings.posFilter = state.settings.posFilter.filter((p) => POS_VALUES.includes(p));
+
+  state.streak = loadStreak();
+  renderStreak();
 
   applySettingsToForm();
   wireSetup();
